@@ -1,0 +1,19 @@
+<?php namespace {{repository.namespace}};
+
+use {{repository.namespaceBase}}\BaseRepository;
+use {{model.fullName}};
+use {{repositoryInterface.fullName}};
+
+class {{repository.name}} extends BaseRepository implements {{repositoryInterface.name}}
+{
+    //
+    /**
+     * Constructor to bind model to repository.
+     *
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function __construct({{model.name}} $model)
+    {
+        parent::__construct($model);
+    }
+}
