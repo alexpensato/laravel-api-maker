@@ -16,4 +16,34 @@ Features:
 
 If you do not use Fractal for your transformation layer, and do not use the Repository Design Pattern with your Models, and don't need BDD-style unit test files, this package is probably not the right choice for you.
 
+## Installation
+
+1) Run ```composer require alexpensato/laravel-api-maker```
+
+2) Register a service provider in the `app.php` configuration file
+
+```php
+<?php
+
+'providers' => [
+    ...
+    'Pensato\Api\ServiceProvider',
+],
+?>
+```
+
+3) Copy basic folder structure to app/Api ```cp -R vendor/alexpensato/laravel-api-maker/templates/Providers app/Providers``` and check what you got there.
+If you need you can use different paths later.
+
+
+## Usage
+
+### Generator
+
+The only console command that is added is ```artisan make:api <ModelName>```.
+
+Imagine you need to create a rest api to list/create/update etc users from users table.
+To achieve that you need to do lots of boilerplate operations - create controller, transformer, set up needed routes.
+
+```php artisan make:api User``` does all the work for you.
 
