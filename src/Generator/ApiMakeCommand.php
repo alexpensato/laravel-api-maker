@@ -45,7 +45,7 @@ class ApiMakeCommand extends Command
         'route'       => [],
         'repository' => [],
         'repositoryInterface' => [],
-        'bdd' => [],
+        'test' => [],
     ];
 
     protected $modelsBaseNamespace;
@@ -83,7 +83,7 @@ class ApiMakeCommand extends Command
 
         $this->addProvider();
 
-        $this->createBdd();
+        $this->createTest();
     }
 
     /**
@@ -105,7 +105,7 @@ class ApiMakeCommand extends Command
             ->setControllerData()
             ->setRouteData()
             ->setTransformerData()
-            ->setBddData();
+            ->setTestData();
     }
 
     /**
@@ -196,9 +196,9 @@ class ApiMakeCommand extends Command
      *
      * @return $this
      */
-    protected function setBddData()
+    protected function setTestData()
     {
-        return $this->setDataForEntity('bdd');
+        return $this->setDataForEntity('test');
     }
 
     /**
@@ -264,9 +264,9 @@ class ApiMakeCommand extends Command
     /**
      *  Create bdd-style unit test file from a stub.
      */
-    protected function createBdd()
+    protected function createTest()
     {
-        $this->createClass('bdd');
+        $this->createClass('test');
     }
 
     /**
@@ -276,7 +276,7 @@ class ApiMakeCommand extends Command
     {
         $stub = $this->constructStub(base_path(config('laravel-api-maker.route_stub')));
 
-        $routesFile = app_path(config('laravel-api-maker.routes_file'));
+        $routesFile = base_path(config('laravel-api-maker.routes_file'));
 
         // read file
         $lines = file($routesFile);
@@ -314,7 +314,7 @@ class ApiMakeCommand extends Command
 
         // modify file
         if (strcmp($penultimate, '}') === 0 && strcmp($lastLine, '}') === 0) {
-            $lines[count($lines) - 2] = '    '.$stub;
+            $lines[count($lines) - 2] = '    '.'    '.$stub;
             $lines[count($lines) - 1] = "\r\n    }\r\n}";
         }
 

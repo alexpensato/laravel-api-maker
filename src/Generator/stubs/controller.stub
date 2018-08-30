@@ -1,19 +1,22 @@
 <?php namespace {{controller.namespace}};
 
-use {{controller.namespaceBase}}\Controller;
+use Illuminate\Http\Request;
+use Pensato\Api\Support\BaseController;
+use {{repositoryInterface.fullName}};
 use {{model.fullName}};
 use {{transformer.fullName}};
 
-class {{controller.name}} extends Controller
+class {{controller.name}} extends BaseController
 {
     /**
-     * Eloquent model.
+     * Constructor.
      *
-     * @return \Illuminate\Database\Eloquent\Model
+     * @param {{repositoryInterface.name}} $repositoryInterface
+     * @param Request $request
      */
-    protected function model()
+    public function __construct(Request $request, {{repositoryInterface.name}} $repositoryInterface)
     {
-        return new {{model.name}};
+        parent::__construct($request, $repositoryInterface);
     }
 
     /**

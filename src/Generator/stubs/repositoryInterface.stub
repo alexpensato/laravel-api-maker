@@ -1,6 +1,6 @@
 <?php namespace {{repositoryInterface.namespace}};
 
-use {{repositoryInterface.namespaceBase}}\RepositoryInterface;
+use Pensato\Api\Support\RepositoryInterface;
 
 interface {{repositoryInterface.name}} extends RepositoryInterface
 {

@@ -1,8 +1,7 @@
 <?php namespace {{repository.namespace}};
 
-use {{repository.namespaceBase}}\BaseRepository;
+use Pensato\Api\Support\BaseRepository;
 use {{model.fullName}};
-use {{repositoryInterface.fullName}};
 
 class {{repository.name}} extends BaseRepository implements {{repositoryInterface.name}}
 {

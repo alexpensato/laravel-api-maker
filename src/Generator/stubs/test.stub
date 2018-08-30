@@ -1,0 +1,28 @@
+<?php
+namespace Tests\Feature;
+
+use Tests\TestCase;
+use Faker\Factory as Faker;
+
+class {{test.name}} extends TestCase
+{
+    /** @specify */
+    protected $pessoa;
+
+    /** @specify */
+    protected $jsonData;
+
+    public function setUp()
+    {
+        parent::setUp();
+        // You can pass localization parameter to create function. E.g.: Faker::create('pt_BR');
+        $this->faker = Faker::create();
+        $this->jsonData = [
+            // write fake parameters here
+        ];
+    }
+
+    // write testing specifications here
+    // E.g.: public function testSomething()
+
+}

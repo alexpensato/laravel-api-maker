@@ -5,7 +5,7 @@ return [
     /*
      * Relative path from the app directory to api controllers directory.
      */
-    'repointerface_dir'  => 'Repositories',
+    'repositoryInterface_dir'  => 'Repositories',
 
     /*
      * Relative path from the app directory to api controllers directory.
@@ -15,7 +15,7 @@ return [
     /*
      * Relative path from the app directory to api controllers directory.
      */
-    'controller_dir'  => 'Http/Controllers',
+    'controller_dir'  => 'Http/Controllers/Api',
 
     /*
      * Relative path from the app directory to transformers directory.
@@ -23,14 +23,13 @@ return [
     'transformer_dir' => 'Http/Transformers',
 
     /*
-     * Relative path from the tests directory to the bdd directory.
+     * Relative path from the base directory to the tests directory.
      */
-    'bdd_dir' => 'tests/Feature',
+    'test_dir' => 'tests/Feature',
 
     /*
      * Relative path from the app directory to the api routes file.
      */
-    // 'routes_file'      => 'Http/routes.php',
     'routes_file'      => 'routes/api.php',
 
     /*
@@ -46,7 +45,7 @@ return [
     /*
      * Relative path from the base directory to the api repository interface stub.
      */
-    'repointerface_stub'  => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/repositoryInterface.stube.stub',
+    'repositoryInterface_stub'  => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/repositoryInterface.stub',
 
     /*
      * Relative path from the base directory to the api repository class stub.
@@ -76,5 +75,5 @@ return [
     /*
      * Relative path from the base directory to the transformer stub.
      */
-    'bdd_stub' => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/bdd.stub',
+    'test_stub' => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/test.stub',
 ];

@@ -1,1 +1,1 @@
-$this->app->bind({{repositoryInterface.name}}::class,{{repository.name}}::class);
+$this->app->bind(\{{repositoryInterface.fullName}}::class,\{{repository.fullName}}::class);
