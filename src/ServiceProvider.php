@@ -33,6 +33,8 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             __DIR__.'/config/config.php' => config_path('laravel-api-maker.php'),
         ]);
 
-        require app_path(config('laravel-api-maker.routes_file'));
+        require base_path(config('laravel-api-maker.routes_file'));
+
+        require app_path(config('laravel-api-maker.provider_file'));
     }
 }

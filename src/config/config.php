@@ -15,22 +15,23 @@ return [
     /*
      * Relative path from the app directory to api controllers directory.
      */
-    'controller_dir'  => 'Http\\Controllers',
+    'controller_dir'  => 'Http/Controllers',
 
     /*
      * Relative path from the app directory to transformers directory.
      */
-    'transformer_dir' => 'Http\\Transformers',
+    'transformer_dir' => 'Http/Transformers',
 
     /*
      * Relative path from the tests directory to the bdd directory.
      */
-    'bdd_dir' => 'tests\\Feature',
+    'bdd_dir' => 'tests/Feature',
 
     /*
      * Relative path from the app directory to the api routes file.
      */
-    'routes_file'      => 'Http\\routes.php',
+    // 'routes_file'      => 'Http/routes.php',
+    'routes_file'      => 'routes/api.php',
 
     /*
      * Relative path from the app directory to the api service provider file.
@@ -70,10 +71,10 @@ return [
     /*
      * Relative path from the base directory to the transformer stub.
      */
-    'transformer_stub' => 'vendor/arrilot/laravel-api-generator/src/Generator/stubs/transformer.stub',
+    'transformer_stub' => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/transformer.stub',
 
     /*
      * Relative path from the base directory to the transformer stub.
      */
-    'bdd_stub' => 'vendor/arrilot/laravel-api-generator/src/Generator/stubs/bdd.stub',
+    'bdd_stub' => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/bdd.stub',
 ];
