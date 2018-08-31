@@ -11,6 +11,13 @@ abstract class BaseRepository implements RepositoryInterface
      */
     protected $model;
 
+    /**
+     * Whether a request should be allowed to perform a full scan on a repository
+     *
+     * @var boolean
+     */
+    protected $allowFullScan = false;
+
     // Constructor to bind model to repo
     public function __construct(Model $model)
     {
@@ -38,7 +45,11 @@ abstract class BaseRepository implements RepositoryInterface
             return $this->model->with($relations)->skip($skip)->limit($limit)->get();
         }
 
-        return $this->model->with($relations)->get();
+        if ($this->allowFullScan) {
+            return $this->model->with($relations)->get();
+        }
+
+        return [];
     }
 
     public function findItem($id, array $relations = [], string $useAsId = null)
