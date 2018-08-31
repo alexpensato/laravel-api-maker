@@ -357,10 +357,7 @@ abstract class BaseController extends LaravelController
      *
      * @return array
      */
-    protected function rulesForCreate()
-    {
-        return [];
-    }
+    abstract protected function rulesForCreate();
 
     /**
      * Get the validation rules for update.
@@ -369,10 +366,7 @@ abstract class BaseController extends LaravelController
      *
      * @return array
      */
-    protected function rulesForUpdate($id)
-    {
-        return [];
-    }
+    abstract protected function rulesForUpdate($id);
 
     /**
      * Generate a Response with a 403 HTTP header and a given message.

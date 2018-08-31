@@ -3,7 +3,6 @@
 use Illuminate\Http\Request;
 use Pensato\Api\Support\BaseController;
 use {{repositoryInterface.fullName}};
-use {{model.fullName}};
 use {{transformer.fullName}};
 
 class {{controller.name}} extends BaseController
@@ -28,4 +27,26 @@ class {{controller.name}} extends BaseController
     {
         return new {{transformer.name}};
     }
+
+     /**
+      * Get the validation rules for create.
+      *
+      * @return array
+      */
+     protected function rulesForCreate()
+     {
+            return [];
+     }
+
+     /**
+      * Get the validation rules for update.
+      *
+      * @param int $id
+      *
+      * @return array
+      */
+     protected function rulesForUpdate($id)
+     {
+            return [];
+     }
 }
