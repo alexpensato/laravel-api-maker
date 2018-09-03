@@ -4,7 +4,7 @@ namespace Pensato\Api\Support;
 
 use Illuminate\Support\Facades\Response;
 
-abstract class ReadOnlyController extends ApiController
+abstract class WebController extends ApiController
 {
     /**
      * Display a listing of the resource.
