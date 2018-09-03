@@ -16,6 +16,8 @@ class {{controller.name}} extends BaseController
     public function __construct(Request $request, {{repositoryInterface.name}} $repositoryInterface)
     {
         parent::__construct($request, $repositoryInterface);
+
+        $this->middleware('cors');
     }
 
     /**
@@ -27,26 +29,4 @@ class {{controller.name}} extends BaseController
     {
         return new {{transformer.name}};
     }
-
-     /**
-      * Get the validation rules for create.
-      *
-      * @return array
-      */
-     protected function rulesForCreate()
-     {
-            return [];
-     }
-
-     /**
-      * Get the validation rules for update.
-      *
-      * @param int $id
-      *
-      * @return array
-      */
-     protected function rulesForUpdate($id)
-     {
-            return [];
-     }
 }

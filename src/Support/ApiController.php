@@ -13,7 +13,7 @@ use League\Fractal\Resource\Item;
 use League\Fractal\Serializer\DataArraySerializer;
 
 
-abstract class BaseController extends LaravelController
+abstract class ApiController extends LaravelController
 {
     /**
      * HTTP header status code.
@@ -245,6 +245,27 @@ abstract class BaseController extends LaravelController
     }
 
     /**
+     * Show the form for creating the specified resource.
+     *
+     * @return Response
+     */
+    public function create()
+    {
+        return $this->errorNotImplemented();
+    }
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param int $id
+     *
+     * @return
+     */
+    public function edit($id)
+    {
+        return $this->errorNotImplemented();
+    }
+
+    /**
      * Getter for statusCode.
      *
      * @return int
@@ -357,7 +378,10 @@ abstract class BaseController extends LaravelController
      *
      * @return array
      */
-    abstract protected function rulesForCreate();
+    protected function rulesForCreate()
+    {
+        return [];
+    }
 
     /**
      * Get the validation rules for update.
@@ -366,7 +390,10 @@ abstract class BaseController extends LaravelController
      *
      * @return array
      */
-    abstract protected function rulesForUpdate($id);
+    protected function rulesForUpdate($id)
+    {
+        return [];
+    }
 
     /**
      * Generate a Response with a 403 HTTP header and a given message.
