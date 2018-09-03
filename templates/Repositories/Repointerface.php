@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use Pensato\Api\Base\RepositoryInterface;
+use Pensato\Api\Support\RepositoryInterface;
 
 interface Repointerface extends RepositoryInterface
 {

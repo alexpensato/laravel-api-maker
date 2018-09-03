@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Pensato\Api\Base\BaseController;
+use Pensato\Api\Support\ApiController;
 
-abstract class Controller extends BaseController
+abstract class Controller extends ApiController
 {
 }
