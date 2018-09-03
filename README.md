@@ -47,15 +47,15 @@ Laravel API Maker  | Laravel
 
 ## Installation
 
-Step 1 - Run ```composer require alexpensato/laravel-api-maker```
+*Step 1* - Run ```composer require alexpensato/laravel-api-maker```
 
-Step 2 - Copy the `ApiServiceProvider` class to `app/Providers` folder:
+*Step 2* - Copy the `ApiServiceProvider` class to `app/Providers` folder:
 
   ```cp -R vendor/alexpensato/laravel-api-maker/templates/Providers app/Providers``` 
 
   and check what you got there.
 
-Step 3 - Register the service providers in the `config/app.php` configuration file
+*Step 3* - Register the service providers in the `config/app.php` configuration file
 
 ```php
 <?php
@@ -79,7 +79,7 @@ Step 3 - Register the service providers in the `config/app.php` configuration fi
 ?>
 ```
 
-Step 4 - Laravel already provides an API routes file. To correctly configure the console generator automation process,
+*Step 4* - Laravel already provides an API routes file. To correctly configure the console generator automation process,
 you need to choose one of the routing templates presented in `vendor/alexpensato/laravel-api-maker/templates/routes/api.php`, 
 and then copy it to your project's api routing file. 
 
