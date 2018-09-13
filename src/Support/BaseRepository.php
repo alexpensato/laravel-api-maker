@@ -7,6 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 abstract class BaseRepository implements RepositoryInterface
 {
     /**
+     * Default size for pagination
+     *
+     * @var int
+     */
+    protected $defaultSize = 10;
+
+    /**
+     * Default order by for queries
+     *
+     * @var string
+     */
+    protected $defaultOrderBy = 'id';
+
+    /**
      * @var Model
      */
     protected $model;
@@ -34,22 +48,28 @@ abstract class BaseRepository implements RepositoryInterface
      * Get all instances of model with relations, paginated or not
      *
      * @param array $relations
-     * @param int   $skip
-     * @param int   $limit
+     * @param int   $page
+     * @param int   $size
      *
      * @return array
      */
-    public function list(array $relations = [], int $skip = 0, int $limit = 0)
+    public function list(array $relations = [], int $page, int $size)
     {
-        if ($limit > 0) {
-            return $this->model->with($relations)->skip($skip)->limit($limit)->get();
+        if ($size > 0) {
+            $skip = ($page > 0) ? ($page-1)*$size : 0;
+            return $this->model->with($relations)->skip($skip)->limit($size)->orderBy($this->defaultOrderBy)->get();
         }
 
         if ($this->allowFullScan) {
-            return $this->model->with($relations)->get();
+            return $this->model->with($relations)->orderBy($this->defaultOrderBy)->get();
         }
 
-        return [];
+        return $this->model->with($relations)->limit($this->defaultSize)->orderBy($this->defaultOrderBy)->get();
+    }
+
+    public function count(array $relations = [])
+    {
+        return $this->model->with($relations)->count();
     }
 
     public function findItem($id, array $relations = [], string $useAsId = null)

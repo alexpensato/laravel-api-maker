@@ -59,18 +59,18 @@ abstract class ApiController extends LaravelController
 
     /**
      * Number of items displayed at once if not specified.
-     * There is no limit if it is 0 or false.
+     * There is no limit if it is 0 or false, except if BaseRepository::allowFullScan is false [default].
      *
      * @var int
      */
-    protected $defaultLimit = 0;
+    protected $defaultSize = 10;
 
     /**
-     * Maximum limit that can be set via $_GET['limit'].
+     * Maximum size that can be set via $_GET['size'].
      *
      * @var int
      */
-    protected $maximumLimit = 50;
+    protected $maxSize = 50;
 
     /**
      * Resource key for an item.
@@ -134,12 +134,14 @@ abstract class ApiController extends LaravelController
     public function index()
     {
         $relations = $this->getEagerLoad();
-        $skip = (int) $this->request->input('skip', 0);
-        $limit = (int) $this->calculateLimit();
+        $page = (int) $this->request->input('page', 1);
+        $size = (int) $this->calculateSize();
 
-        $items = $this->repository->list($relations, $skip, $limit);
+        $items = $this->repository->list($relations, $page, $size);
 
-        return $this->respondWithCollection($items, $skip, $limit);
+        $count = $this->repository->count($relations);
+
+        return $this->respondWithCollection($items, $page, $size, $count);
     }
 
     /**
@@ -187,6 +189,25 @@ abstract class ApiController extends LaravelController
         }
 
         return $this->respondWithItem($item);
+    }
+
+    /**
+     * Display the count of the specified resource.
+     * GET /api/{resource}/count.
+     *
+     * @return Response
+     */
+    public function count()
+    {
+        $relations = $this->getEagerLoad();
+
+        $count = $this->repository->count($relations);
+
+        if (!$count) {
+            return $this->errorNotFound();
+        }
+
+        return $count;
     }
 
     /**
@@ -309,17 +330,18 @@ abstract class ApiController extends LaravelController
      * Respond with a given collection.
      *
      * @param $collection
+     * @param $count
      * @param int $skip
      * @param int $limit
      *
      * @return mixed
      */
-    protected function respondWithCollection($collection, $skip = 0, $limit = 0)
+    protected function respondWithCollection($collection, $count, $skip = 0, $limit = 0)
     {
         $resource = new Collection($collection, $this->transformer, $this->resourceKeyPlural);
 
         if ($limit > 0) {
-            $cursor = new Cursor($skip, $skip + $limit, $collection->count());
+            $cursor = new Cursor($skip, $skip + $limit, $collection->count(), $count);
             $resource->setCursor($cursor);
         }
 
@@ -509,14 +531,14 @@ abstract class ApiController extends LaravelController
     }
 
     /**
-     * Calculates limit for a number of items displayed in list.
+     * Calculates size of number of items displayed in list.
      *
      * @return int
      */
-    protected function calculateLimit()
+    protected function calculateSize()
     {
-        $limit = (int) $this->request->input('limit', $this->defaultLimit);
+        $size = (int) $this->request->input('size', $this->defaultSize);
 
-        return ($this->maximumLimit < $limit) ? $this->maximumLimit : $limit;
+        return ($this->maxSize < $size) ? $this->maxSize : $size;
     }
 }

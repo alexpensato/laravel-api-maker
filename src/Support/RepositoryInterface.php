@@ -6,7 +6,9 @@ interface RepositoryInterface
 {
     public function all();
 
-    public function list(array $relations = [], int $skip = 0, int $limit = 0);
+    public function list(array $relations = [], int $page, int $size);
+
+    public function count(array $relations = []);
 
     public function findItem($id, array $relations = [], string $useAsId = null);
 
