@@ -5,7 +5,7 @@ use Pensato\Api\Support\BaseController;
 use {{repositoryInterface.fullName}};
 use {{transformer.fullName}};
 
-class {{controller.name}} extends BaseController
+class {{controller.name}} extends ApiController
 {
     /**
      * Constructor.
