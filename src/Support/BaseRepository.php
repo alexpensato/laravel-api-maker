@@ -53,7 +53,7 @@ abstract class BaseRepository implements RepositoryInterface
      *
      * @return array
      */
-    public function list(array $relations = [], int $page, int $size)
+    public function list(int $page, int $size, array $relations = [])
     {
         if ($size > 0) {
             $skip = ($page > 0) ? ($page-1)*$size : 0;

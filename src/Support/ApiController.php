@@ -137,7 +137,7 @@ abstract class ApiController extends LaravelController
         $page = (int) $this->request->input('page', 1);
         $size = (int) $this->calculateSize();
 
-        $items = $this->repository->list($relations, $page, $size);
+        $items = $this->repository->list($page, $size, $relations);
 
         $count = $this->repository->count($relations);
 
