@@ -21,7 +21,7 @@ abstract class GuzzleTestCase extends BaseTestCase
 {
     use CreatesApplication, RefreshDatabase, Specify;
 
-    const SUCESSO = 200;
+    const SUCCESS = 200;
 
     protected $uri;
     
@@ -42,9 +42,17 @@ abstract class GuzzleTestCase extends BaseTestCase
     {
         parent::setUp();
 
-        // Necessário para aplicações que utilizam o SAU-CAS
-        // Também não será usado neste exemplo
-//        \Config::set('cas', ['cas_pretend_user' => 'teste']);
+        // create our http client (Guzzle)
+        $this->client = new GuzzleClient([
+            // Base URI is used with relative requests
+            'base_uri' => env('BASE_URI')
+        ]);
+
+        // create default jsonData using Faker
+        $this->faker = Faker::create('pt_BR');
+
+        // Example for CAS authentication
+//        \Config::set('cas', ['cas_pretend_user' => 'test']);
     }
 
     /**
