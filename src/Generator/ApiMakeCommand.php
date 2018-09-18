@@ -274,7 +274,8 @@ class ApiMakeCommand extends Command
      */
     protected function addRoutes()
     {
-        $stub = $this->constructStub(base_path(config('laravel-api-maker.route_stub')));
+        $stubCount = $this->constructStub(base_path(config('laravel-api-maker.count_stub')));
+        $stubRoute = $this->constructStub(base_path(config('laravel-api-maker.route_stub')));
 
         $routesFile = base_path(config('laravel-api-maker.routes_file'));
 
@@ -284,10 +285,12 @@ class ApiMakeCommand extends Command
 
         // modify file
         if (strcmp($lastLine, '});') === 0) {
-            $lines[count($lines) - 1] = '    '.$stub;
+            $lines[count($lines) - 1] = '    '.$stubCount;
+            $lines[] = '    '.$stubRoute;
             $lines[] = "\r\n});\r\n";
         } else {
-            $lines[] = "$stub\r\n";
+            $lines[] = "$stubCount\r\n";
+            $lines[] = "$stubRoute\r\n";
         }
 
         // save file

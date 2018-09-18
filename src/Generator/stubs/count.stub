@@ -1,0 +1,1 @@
+Route::get('{{route.name}}/count', 'Api\{{model.fullNameWithoutRoot}}Controller@count');
