@@ -3,7 +3,6 @@
 namespace Pensato\Api\Support;
 
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller as LaravelController;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use League\Fractal\Manager;
@@ -13,15 +12,8 @@ use League\Fractal\Resource\Item;
 use League\Fractal\Serializer\DataArraySerializer;
 
 
-abstract class ApiController extends LaravelController
+abstract class ApiController extends BaseController
 {
-    /**
-     * HTTP header status code.
-     *
-     * @var int
-     */
-    protected $statusCode = 200;
-
     /**
      * Fractal Manager instance.
      *
@@ -35,42 +27,6 @@ abstract class ApiController extends LaravelController
      * @var RepositoryInterface
      */
     protected $repository;
-
-    /**
-     * Fractal Transformer instance.
-     *
-     * @var \League\Fractal\TransformerAbstract
-     */
-    protected $transformer;
-
-    /**
-     * Illuminate\Http\Request instance.
-     *
-     * @var \Illuminate\Http\Request
-     */
-    protected $request;
-
-    /**
-     * Do we need to unguard the model before create/update?
-     *
-     * @var bool
-     */
-    protected $unguard = false;
-
-    /**
-     * Number of items displayed at once if not specified.
-     * There is no limit if it is 0 or false, except if BaseRepository::allowFullScan is false [default].
-     *
-     * @var int
-     */
-    protected $defaultSize = 10;
-
-    /**
-     * Maximum size that can be set via $_GET['size'].
-     *
-     * @var int
-     */
-    protected $maxSize = 50;
 
     /**
      * Resource key for an item.
@@ -89,31 +45,22 @@ abstract class ApiController extends LaravelController
     /**
      * Constructor.
      *
-     * @param RepositoryInterface $repositoryInterface
      * @param Request $request
+     * @param RepositoryInterface $repositoryInterface
      */
     public function __construct(Request $request, RepositoryInterface $repositoryInterface)
     {
-        $this->repository = $repositoryInterface;
+        parent::__construct($request);
 
-        $this->transformer = $this->transformer();
+        $this->repository = $repositoryInterface;
 
         $this->fractal = new Manager();
         $this->fractal->setSerializer($this->serializer());
-
-        $this->request = $request;
 
         if ($this->request->has('include')) {
             $this->fractal->parseIncludes(camel_case($this->request->input('include')));
         }
     }
-
-    /**
-     * Transformer for the current model.
-     *
-     * @return \League\Fractal\TransformerAbstract
-     */
-    abstract protected function transformer();
 
     /**
      * Serializer for the current model.
@@ -134,14 +81,14 @@ abstract class ApiController extends LaravelController
     public function index()
     {
         $relations = $this->getEagerLoad();
-        $page = (int) $this->request->input('page', 1);
-        $size = (int) $this->calculateSize();
+        $page = (int) $this->request->input('page');
+        $size = (int) $this->request->input('size');
 
         $items = $this->repository->list($page, $size, $relations);
 
         $count = $this->repository->count($relations);
 
-        return $this->respondWithCollection($items, $page, $size, $count);
+        return $this->respondWithCollection($items, $page, $count);
     }
 
     /**
@@ -158,9 +105,10 @@ abstract class ApiController extends LaravelController
             return $this->errorWrongArgs('Empty data');
         }
 
+        /** @var \Illuminate\Contracts\Validation\Validator $validator */
         $validator = Validator::make($data, $this->rulesForCreate());
         if ($validator->fails()) {
-            return $this->errorWrongArgs($validator->messages());
+            return $this->errorWrongArgs($validator->errors()->messages());
         }
 
         $this->unguardIfNeeded();
@@ -231,9 +179,10 @@ abstract class ApiController extends LaravelController
             return $this->errorNotFound();
         }
 
+        /** @var \Illuminate\Contracts\Validation\Validator $validator */
         $validator = Validator::make($data, $this->rulesForUpdate($item->id));
         if ($validator->fails()) {
-            return $this->errorWrongArgs($validator->messages());
+            return $this->errorWrongArgs($validator->errors()->messages());
         }
 
         $this->unguardIfNeeded();
@@ -265,243 +214,6 @@ abstract class ApiController extends LaravelController
         return response()->json(['message' => 'Deleted']);
     }
 
-    /**
-     * Show the form for creating the specified resource.
-     *
-     * @return Response
-     */
-    public function create()
-    {
-        return $this->errorNotImplemented();
-    }
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param int $id
-     *
-     * @return
-     */
-    public function edit($id)
-    {
-        return $this->errorNotImplemented();
-    }
-
-    /**
-     * Getter for statusCode.
-     *
-     * @return int
-     */
-    protected function getStatusCode()
-    {
-        return $this->statusCode;
-    }
-
-    /**
-     * Setter for statusCode.
-     *
-     * @param int $statusCode Value to set
-     *
-     * @return self
-     */
-    protected function setStatusCode($statusCode)
-    {
-        $this->statusCode = $statusCode;
-
-        return $this;
-    }
-
-    /**
-     * Respond with a given item.
-     *
-     * @param $item
-     *
-     * @return mixed
-     */
-    protected function respondWithItem($item)
-    {
-        $resource = new Item($item, $this->transformer, $this->resourceKeySingular);
-
-        $rootScope = $this->prepareRootScope($resource);
-
-        return $this->respondWithArray($rootScope->toArray());
-    }
-
-    /**
-     * Respond with a given collection.
-     *
-     * @param $collection
-     * @param $count
-     * @param int $skip
-     * @param int $limit
-     *
-     * @return mixed
-     */
-    protected function respondWithCollection($collection, $count, $skip = 0, $limit = 0)
-    {
-        $resource = new Collection($collection, $this->transformer, $this->resourceKeyPlural);
-
-        if ($limit > 0) {
-            $cursor = new Cursor($skip, $skip + $limit, $collection->count(), $count);
-            $resource->setCursor($cursor);
-        }
-
-        $rootScope = $this->prepareRootScope($resource);
-
-        return $this->respondWithArray($rootScope->toArray());
-    }
-
-    /**
-     * Respond with a given array of items.
-     *
-     * @param array $array
-     * @param array $headers
-     *
-     * @return mixed
-     */
-    protected function respondWithArray(array $array, array $headers = [])
-    {
-        return response()->json($array, $this->statusCode, $headers);
-    }
-
-    /**
-     * Response with the current error.
-     *
-     * @param string $message
-     *
-     * @return mixed
-     */
-    protected function respondWithError($message)
-    {
-        return $this->respondWithArray([
-            'error' => [
-                'http_code' => $this->statusCode,
-                'message'   => $message,
-            ],
-        ]);
-    }
-
-    /**
-     * Prepare root scope and set some meta information.
-     *
-     * @param Item|Collection $resource
-     *
-     * @return \League\Fractal\Scope
-     */
-    protected function prepareRootScope($resource)
-    {
-        $resource->setMetaValue('available_includes', $this->transformer->getAvailableIncludes());
-        $resource->setMetaValue('default_includes', $this->transformer->getDefaultIncludes());
-
-        return $this->fractal->createData($resource);
-    }
-
-    /**
-     * Get the validation rules for create.
-     *
-     * @return array
-     */
-    protected function rulesForCreate()
-    {
-        return [];
-    }
-
-    /**
-     * Get the validation rules for update.
-     *
-     * @param int $id
-     *
-     * @return array
-     */
-    protected function rulesForUpdate($id)
-    {
-        return [];
-    }
-
-    /**
-     * Generate a Response with a 403 HTTP header and a given message.
-     *
-     * @param $message
-     *
-     * @return Response
-     */
-    protected function errorForbidden($message = 'Forbidden')
-    {
-        return $this->setStatusCode(403)->respondWithError($message);
-    }
-
-    /**
-     * Generate a Response with a 500 HTTP header and a given message.
-     *
-     * @param string $message
-     *
-     * @return Response
-     */
-    protected function errorInternalError($message = 'Internal Error')
-    {
-        return $this->setStatusCode(500)->respondWithError($message);
-    }
-
-    /**
-     * Generate a Response with a 404 HTTP header and a given message.
-     *
-     * @param string $message
-     *
-     * @return Response
-     */
-    protected function errorNotFound($message = 'Resource Not Found')
-    {
-        return $this->setStatusCode(404)->respondWithError($message);
-    }
-
-    /**
-     * Generate a Response with a 401 HTTP header and a given message.
-     *
-     * @param string $message
-     *
-     * @return Response
-     */
-    protected function errorUnauthorized($message = 'Unauthorized')
-    {
-        return $this->setStatusCode(401)->respondWithError($message);
-    }
-
-    /**
-     * Generate a Response with a 400 HTTP header and a given message.
-     *
-     * @param string$message
-     *
-     * @return Response
-     */
-    protected function errorWrongArgs($message = 'Wrong Arguments')
-    {
-        return $this->setStatusCode(400)->respondWithError($message);
-    }
-
-    /**
-     * Generate a Response with a 501 HTTP header and a given message.
-     *
-     * @param string $message
-     *
-     * @return Response
-     */
-    protected function errorNotImplemented($message = 'Not implemented')
-    {
-        return $this->setStatusCode(501)->respondWithError($message);
-    }
-
-    /**
-     * Specify relations for eager loading.
-     *
-     * @return array
-     */
-    protected function getEagerLoad()
-    {
-        $include = camel_case($this->request->input('include', ''));
-        $includes = explode(',', $include);
-        $includes = array_filter($includes);
-
-        return $includes ?: [];
-    }
 
     /**
      * Get item according to mode.
@@ -530,15 +242,5 @@ abstract class ApiController extends LaravelController
         }
     }
 
-    /**
-     * Calculates size of number of items displayed in list.
-     *
-     * @return int
-     */
-    protected function calculateSize()
-    {
-        $size = (int) $this->request->input('size', $this->defaultSize);
 
-        return ($this->maxSize < $size) ? $this->maxSize : $size;
-    }
 }

@@ -3,15 +3,43 @@
 namespace Pensato\Api\Support;
 
 use Illuminate\Database\Eloquent\Model;
+use League\Fractal\Pagination\Cursor;
+use League\Fractal\Resource\Collection;
 
 abstract class BaseRepository implements RepositoryInterface
 {
+    /**
+     * @var Model
+     */
+    protected $model;
+
+    /**
+     * Fractal Transformer instance.
+     *
+     * @var \League\Fractal\TransformerAbstract
+     */
+    protected $transformer;
+
+    /**
+     * Do we need to unguard the model before create/update?
+     *
+     * @var bool
+     */
+    protected $unguard = false;
+
     /**
      * Default size for pagination
      *
      * @var int
      */
     protected $defaultSize = 10;
+
+    /**
+     * Maximum size that can be set via $_GET['size'].
+     *
+     * @var int
+     */
+    protected $maxSize = 50;
 
     /**
      * Default order by for queries
@@ -21,24 +49,38 @@ abstract class BaseRepository implements RepositoryInterface
     protected $defaultOrderBy = 'id';
 
     /**
-     * @var Model
-     */
-    protected $model;
-
-    /**
      * Whether a request should be allowed to perform a full scan on a repository
      *
      * @var boolean
      */
     protected $allowFullScan = false;
 
-    // Constructor to bind model to repo
+
+    /**
+     * Constructor to bind model to repo.
+     *
+     * @param Model $model
+     */
     public function __construct(Model $model)
     {
         $this->model = $model;
+
+        $this->transformer = $this->transformer();
     }
 
-    // Get all instances of model
+    /**
+     * Transformer for the current model.
+     *
+     * @return \League\Fractal\TransformerAbstract
+     */
+    abstract protected function transformer();
+
+
+    /**
+     * Get all instances of model with relations
+     *
+     * @return array
+     */
     public function all()
     {
         return $this->model->all();
@@ -84,6 +126,7 @@ abstract class BaseRepository implements RepositoryInterface
     // create a new record in the database
     public function create(array $data)
     {
+        // saveOrFail
         return $this->model->create($data);
     }
 
@@ -103,8 +146,66 @@ abstract class BaseRepository implements RepositoryInterface
     // show the record with the given id
     public function show($id)
     {
-        return $this->model-findOrFail($id);
+        return $this->model->findOrFail($id);
     }
+
+    /**
+     * Respond with a given item.
+     *
+     * @param $item
+     *
+     * @return mixed
+     */
+    protected function respondWithItem($item)
+    {
+        $resource = new Item($item, $this->transformer, $this->resourceKeySingular);
+
+        $rootScope = $this->prepareRootScope($resource);
+
+        return $this->respondWithArray($rootScope->toArray());
+    }
+
+    /**
+     * Respond with a given collection.
+     *
+     * @param $collection
+     * @param $page
+     * @param $count
+     *
+     * @return mixed
+     */
+    protected function respondWithCollection($collection, $page = 0, $count = 0)
+    {
+        $resource = new Collection($collection, $this->transformer, $this->resourceKeyPlural);
+
+        if ($page > 0) {
+            $prev = ($page > 1) ? $page-1 : null;
+            $next = $page + 1;
+            // Cursor::__construct($current = null, $prev = null, $next = null, $count = null)
+            $cursor = new Cursor($page, $prev, $next, $count);
+            $resource->setCursor($cursor);
+        }
+
+        $rootScope = $this->prepareRootScope($resource);
+
+        return $this->respondWithArray($rootScope->toArray());
+    }
+
+    /**
+     * Prepare root scope and set some meta information.
+     *
+     * @param Item|Collection $resource
+     *
+     * @return \League\Fractal\Scope
+     */
+    protected function prepareRootScope($resource)
+    {
+        $resource->setMetaValue('available_includes', $this->transformer->getAvailableIncludes());
+        $resource->setMetaValue('default_includes', $this->transformer->getDefaultIncludes());
+
+        return $this->fractal->createData($resource);
+    }
+
 
     // Get the associated model
     public function getModel()
@@ -124,4 +225,21 @@ abstract class BaseRepository implements RepositoryInterface
     {
         $this->model->unguard();
     }
+
+    /**
+     * Calculates size of number of items displayed in list.
+     *
+     * @param int $size
+     *
+     * @return int
+     */
+    protected function calculateSize($size)
+    {
+        if ($size.isEmpty()) {
+            $size = $this->defaultSize;
+        }
+
+        return ($this->maxSize < $size) ? $this->maxSize : $size;
+    }
 }
+
