@@ -5,6 +5,8 @@ namespace Pensato\Api\Support;
 use Illuminate\Database\Eloquent\Model;
 use League\Fractal\Pagination\Cursor;
 use League\Fractal\Resource\Collection;
+use League\Fractal\Resource\Item;
+use League\Fractal\Resource\ResourceAbstract;
 
 abstract class BaseRepository implements RepositoryInterface
 {
@@ -87,54 +89,90 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
+     * Count items in database
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return $this->model->count();
+    }
+
+    /**
      * Get all instances of model with relations, paginated or not
      *
      * @param array $relations
      * @param int   $page
      * @param int   $size
      *
-     * @return array
+     * @return ResourceAbstract
      */
     public function list(int $page, int $size, array $relations = [])
     {
+        $list = null;
+
         if ($size > 0) {
             $skip = ($page > 0) ? ($page-1)*$size : 0;
-            return $this->model->with($relations)->skip($skip)->limit($size)->orderBy($this->defaultOrderBy)->get();
+            $list = $this->model->with($relations)->skip($skip)->limit($size)->orderBy($this->defaultOrderBy)->get();
+
+        } elseif ($this->allowFullScan) {
+            $list = $this->model->with($relations)->orderBy($this->defaultOrderBy)->get();
+
+        } else {
+            $list = $this->model->with($relations)->limit($this->defaultSize)->orderBy($this->defaultOrderBy)->get();
         }
 
-        if ($this->allowFullScan) {
-            return $this->model->with($relations)->orderBy($this->defaultOrderBy)->get();
-        }
+        $count = $this->count();
 
-        return $this->model->with($relations)->limit($this->defaultSize)->orderBy($this->defaultOrderBy)->get();
+        return $this->loadResourceWithCollection($list, $page, $count);
     }
 
-    public function count(array $relations = [])
-    {
-        return $this->model->with($relations)->count();
-    }
-
+    /**
+     * @param $id
+     * @param array $relations
+     * @param string $useAsId
+     *
+     * @return ResourceAbstract
+     */
     public function findItem($id, array $relations = [], string $useAsId = null)
     {
+        $item = null;
+
         if (empty($useAsId)) {
-            return $this->model->with($relations)->find($id);
+            $item = $this->model->with($relations)->find($id);
+        } else {
+            $item = $this->model->with($relations)->where($useAsId, '=', $id)->first();
         }
 
-        return $this->model->with($relations)->where($useAsId, '=', $id)->first();
+        return $this->loadResourceWithItem($item);
     }
 
     // create a new record in the database
     public function create(array $data)
     {
-        // saveOrFail
-        return $this->model->create($data);
+        $this->unguardIfNeeded();
+
+        $item = $this->model->create($data);
+
+        return $this->loadResourceWithItem($item);
     }
 
     // update record in the database
     public function update(array $data, $id)
     {
-        $record = $this->find($id);
-        return $record->update($data);
+        $this->unguardIfNeeded();
+
+        $record = $this->model->find($id);
+        if (!$record) {
+            return null;
+        }
+
+        $record->fill($data);
+        $record->save();
+
+        $item = $record->update($data);
+
+        return $this->loadResourceWithItem($item);
     }
 
     // remove record from the database
@@ -150,32 +188,34 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * Respond with a given item.
+     * Load Fractal Resource with a given item.
      *
      * @param $item
      *
-     * @return mixed
+     * @return ResourceAbstract
      */
-    protected function respondWithItem($item)
+    protected function loadResourceWithItem($item)
     {
+        /** @var Item $resource */
         $resource = new Item($item, $this->transformer, $this->resourceKeySingular);
 
-        $rootScope = $this->prepareRootScope($resource);
+        $resource = $this->setMetaIncludes($resource);
 
-        return $this->respondWithArray($rootScope->toArray());
+        return $resource;
     }
 
     /**
-     * Respond with a given collection.
+     * Load Fractal Resource with a given collection.
      *
      * @param $collection
      * @param $page
      * @param $count
      *
-     * @return mixed
+     * @return ResourceAbstract
      */
-    protected function respondWithCollection($collection, $page = 0, $count = 0)
+    protected function loadResourceWithCollection($collection, $page = 0, $count = 0)
     {
+        /** @var Collection $resource */
         $resource = new Collection($collection, $this->transformer, $this->resourceKeyPlural);
 
         if ($page > 0) {
@@ -186,44 +226,43 @@ abstract class BaseRepository implements RepositoryInterface
             $resource->setCursor($cursor);
         }
 
-        $rootScope = $this->prepareRootScope($resource);
+        $resource = $this->setMetaIncludes($resource);
 
-        return $this->respondWithArray($rootScope->toArray());
+        return $resource;
     }
 
     /**
-     * Prepare root scope and set some meta information.
+     * Set some meta information.
      *
      * @param Item|Collection $resource
      *
-     * @return \League\Fractal\Scope
+     * @return Collection
      */
-    protected function prepareRootScope($resource)
+    protected function setMetaIncludes($resource)
     {
         $resource->setMetaValue('available_includes', $this->transformer->getAvailableIncludes());
         $resource->setMetaValue('default_includes', $this->transformer->getDefaultIncludes());
 
-        return $this->fractal->createData($resource);
+        return $resource;
     }
 
-
-    // Get the associated model
-    public function getModel()
-    {
-        return $this->model;
-    }
-
-    // Set the associated model
+    /**
+     * Set the associated model
+     */
     public function setModel($model)
     {
         $this->model = $model;
         return $this;
     }
 
-    // Get the associated model
-    public function unguard()
+    /**
+     * Unguard eloquent model if needed.
+     */
+    public function unguardIfNeeded()
     {
-        $this->model->unguard();
+        if ($this->unguard) {
+            $this->model->unguard();
+        }
     }
 
     /**

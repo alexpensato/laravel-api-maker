@@ -5,12 +5,6 @@ namespace Pensato\Api\Support;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as LaravelController;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Validator;
-use League\Fractal\Manager;
-use League\Fractal\Pagination\Cursor;
-use League\Fractal\Resource\Collection;
-use League\Fractal\Resource\Item;
-use League\Fractal\Serializer\DataArraySerializer;
 
 
 abstract class BaseController extends LaravelController
@@ -37,6 +31,14 @@ abstract class BaseController extends LaravelController
     protected $request;
 
     /**
+     * Parameters storage.
+     * Belongs to parent class Symfony\Component\HttpFoundation\ParameterBag
+     *
+     * @var array
+     */
+    protected $input;
+
+    /**
      * Constructor.
      *
      * @param Request $request
@@ -44,6 +46,8 @@ abstract class BaseController extends LaravelController
     public function __construct(Request $request)
     {
         $this->request = $request;
+
+        $this->input = $this->request->all();
     }
 
     /**

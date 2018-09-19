@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
 use League\Fractal\Manager;
-use League\Fractal\Pagination\Cursor;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
+use League\Fractal\Resource\ResourceAbstract;
 use League\Fractal\Serializer\DataArraySerializer;
 
 
@@ -33,14 +33,14 @@ abstract class ApiController extends BaseController
      *
      * @var string
      */
-    protected $resourceKeySingular = 'data';
+//    protected $resourceKeySingular = 'data';
 
     /**
      * Resource key for a collection.
      *
      * @var string
      */
-    protected $resourceKeyPlural = 'data';
+//    protected $resourceKeyPlural = 'data';
 
     /**
      * Constructor.
@@ -84,11 +84,11 @@ abstract class ApiController extends BaseController
         $page = (int) $this->request->input('page');
         $size = (int) $this->request->input('size');
 
-        $items = $this->repository->list($page, $size, $relations);
+        $resource = $this->repository->list($page, $size, $relations);
 
-        $count = $this->repository->count($relations);
+        $scope = $this->fractal->createData($resource);
 
-        return $this->respondWithCollection($items, $page, $count);
+        return $this->respondWithArray($scope->toArray());
     }
 
     /**
@@ -111,11 +111,11 @@ abstract class ApiController extends BaseController
             return $this->errorWrongArgs($validator->errors()->messages());
         }
 
-        $this->unguardIfNeeded();
-
         $item = $this->repository->create($data);
 
-        return $this->respondWithItem($item);
+        $scope = $this->fractal->createData($item);
+
+        return $this->respondWithArray($scope->toArray());
     }
 
     /**
@@ -136,7 +136,9 @@ abstract class ApiController extends BaseController
             return $this->errorNotFound();
         }
 
-        return $this->respondWithItem($item);
+        $scope = $this->fractal->createData($item);
+
+        return $this->respondWithArray($scope->toArray());
     }
 
     /**
@@ -149,7 +151,7 @@ abstract class ApiController extends BaseController
     {
         $relations = $this->getEagerLoad();
 
-        $count = $this->repository->count($relations);
+        $count = $this->repository->count();
 
         if (!$count) {
             return $this->errorNotFound();
@@ -174,23 +176,19 @@ abstract class ApiController extends BaseController
             return $this->errorWrongArgs('Empty data');
         }
 
-        $item = $this->findItem($id);
-        if (!$item) {
-            return $this->errorNotFound();
-        }
-
-        /** @var \Illuminate\Contracts\Validation\Validator $validator */
-        $validator = Validator::make($data, $this->rulesForUpdate($item->id));
+        $validator = Validator::make($data, $this->rulesForUpdate($id));
         if ($validator->fails()) {
             return $this->errorWrongArgs($validator->errors()->messages());
         }
 
-        $this->unguardIfNeeded();
+        $item = $this->repository->update($data, $id);
+        if (!$item) {
+            return $this->errorNotFound();
+        }
 
-        $item->fill($data);
-        $item->save();
+        $scope = $this->fractal->createData($item);
 
-        return $this->respondWithItem($item);
+        return $this->respondWithArray($scope->toArray());
     }
 
     /**
@@ -233,13 +231,15 @@ abstract class ApiController extends BaseController
     }
 
     /**
-     * Unguard eloquent model if needed.
+     * Prepare root scope
+     *
+     * @param Item|Collection $resource
+     *
+     * @return \League\Fractal\Scope
      */
-    protected function unguardIfNeeded()
+    protected function getScope($resource)
     {
-        if ($this->unguard) {
-            $this->repository->unguard();
-        }
+        return $this->fractal->createData($resource);
     }
 
 

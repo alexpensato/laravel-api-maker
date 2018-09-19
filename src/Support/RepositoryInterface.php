@@ -8,7 +8,7 @@ interface RepositoryInterface
 
     public function list(int $page, int $size, array $relations = []);
 
-    public function count(array $relations = []);
+    public function count();
 
     public function findItem($id, array $relations = [], string $useAsId = null);
 
