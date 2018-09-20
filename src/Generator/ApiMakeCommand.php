@@ -4,6 +4,7 @@ namespace Pensato\Api\Generator;
 
 use Illuminate\Console\DetectsApplicationNamespace;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Filesystem\Filesystem;
 use Symfony\Component\Console\Input\InputArgument;
 
@@ -66,6 +67,8 @@ class ApiMakeCommand extends Command
      * Execute the console command.
      *
      * @return void
+     *
+     * @throws FileNotFoundException
      */
     public function handle()
     {
@@ -231,6 +234,8 @@ class ApiMakeCommand extends Command
 
     /**
      *  Create repository interface file from a stub.
+     *
+     * @throws FileNotFoundException
      */
     protected function createRepositoryInterface()
     {
@@ -239,6 +244,8 @@ class ApiMakeCommand extends Command
 
     /**
      *  Create repository class file from a stub.
+     *
+     * @throws FileNotFoundException
      */
     protected function createRepository()
     {
@@ -247,6 +254,8 @@ class ApiMakeCommand extends Command
 
     /**
      *  Create controller class file from a stub.
+     *
+     * @throws FileNotFoundException
      */
     protected function createController()
     {
@@ -255,6 +264,8 @@ class ApiMakeCommand extends Command
 
     /**
      *  Create controller class file from a stub.
+     *
+     * @throws FileNotFoundException
      */
     protected function createTransformer()
     {
@@ -263,14 +274,18 @@ class ApiMakeCommand extends Command
 
     /**
      *  Create bdd-style unit test file from a stub.
+     *
+     * @throws FileNotFoundException
      */
     protected function createTest()
     {
-        $this->createClass('test');
+        $this->createBaseClass('test');
     }
 
     /**
      *  Add routes to routes file.
+     *
+     * @throws FileNotFoundException
      */
     protected function addRoutes()
     {
@@ -303,6 +318,8 @@ class ApiMakeCommand extends Command
 
     /**
      *  Add provider to Api service provider file.
+     *
+     * @throws FileNotFoundException
      */
     protected function addProvider()
     {
@@ -353,6 +370,29 @@ class ApiMakeCommand extends Command
     }
 
     /**
+     * Create a test class on the base path.
+     *
+     * @param $type
+     *
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     */
+    protected function createTestClass($type)
+    {
+        $path = base_path(config('laravel-api-maker.test_file'));
+        if ($this->files->exists($path)) {
+            $this->error(ucfirst($type).' already exists!');
+
+            return;
+        }
+
+        $this->makeDirectoryIfNeeded($path);
+
+        $this->files->put($path, $this->constructStub(base_path(config('laravel-api-maker.'.$type.'_stub'))));
+
+        $this->info(ucfirst($type).' created successfully.');
+    }
+
+    /**
      * Get the destination file path.
      *
      * @param string $name
@@ -370,8 +410,6 @@ class ApiMakeCommand extends Command
      * Build the directory for the class if needed.
      *
      * @param string $path
-     *
-     * @return string
      */
     protected function makeDirectoryIfNeeded($path)
     {
@@ -387,6 +425,8 @@ class ApiMakeCommand extends Command
      * @param string $path
      *
      * @return string
+     *
+     * @throws FileNotFoundException
      */
     protected function constructStub($path)
     {

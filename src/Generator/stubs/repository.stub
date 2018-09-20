@@ -8,8 +8,6 @@ class {{repository.name}} extends BaseRepository implements {{repositoryInterfac
 {
     /**
      * Constructor to bind model to repository.
-     *
-     * @return \Illuminate\Database\Eloquent\Model
      */
     public function __construct({{model.name}} $model)
     {
