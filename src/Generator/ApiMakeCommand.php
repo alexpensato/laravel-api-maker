@@ -279,7 +279,7 @@ class ApiMakeCommand extends Command
      */
     protected function createTest()
     {
-        $this->createBaseClass('test');
+        $this->createTestClass('test');
     }
 
     /**
