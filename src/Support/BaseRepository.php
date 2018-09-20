@@ -57,6 +57,20 @@ abstract class BaseRepository implements RepositoryInterface
      */
     protected $allowFullScan = false;
 
+    /**
+     * Resource key for an item.
+     *
+     * @var string
+     */
+    protected $resourceKeySingular = 'data';
+
+    /**
+     * Resource key for a collection.
+     *
+     * @var string
+     */
+    protected $resourceKeyPlural = 'data';
+
 
     /**
      * Constructor to bind model to repo.
@@ -73,7 +87,7 @@ abstract class BaseRepository implements RepositoryInterface
     /**
      * Transformer for the current model.
      *
-     * @return \League\Fractal\TransformerAbstract
+     * @return BaseTransformer
      */
     abstract protected function transformer();
 
@@ -128,6 +142,8 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
+     * Find item by id
+     *
      * @param $id
      * @param array $relations
      * @param string $useAsId
@@ -147,17 +163,32 @@ abstract class BaseRepository implements RepositoryInterface
         return $this->loadResourceWithItem($item);
     }
 
-    // create a new record in the database
+    /**
+     * Create a new record in the database
+     *
+     * @param array $data
+     *
+     * @return ResourceAbstract
+     */
     public function create(array $data)
     {
         $this->unguardIfNeeded();
 
-        $item = $this->model->create($data);
+        $item = $this->transformer->mapper($data, $this->model);
 
-        return $this->loadResourceWithItem($item);
+        $record = $this->model->create($item);
+
+        return $this->loadResourceWithItem($record);
     }
 
-    // update record in the database
+    /**
+     * Update record in the database
+     *
+     * @param array $data
+     * @param int $id
+     *
+     * @return ResourceAbstract
+     */
     public function update(array $data, $id)
     {
         $this->unguardIfNeeded();
@@ -167,7 +198,8 @@ abstract class BaseRepository implements RepositoryInterface
             return null;
         }
 
-        $record->fill($data);
+        $record = $this->transformer->mapper($data, $record);
+
         $record->save();
 
         $item = $record->update($data);
@@ -175,13 +207,31 @@ abstract class BaseRepository implements RepositoryInterface
         return $this->loadResourceWithItem($item);
     }
 
-    // remove record from the database
+    /**
+     * Remove record from the database
+     *
+     * @param int $id
+     *
+     * @return int
+     */
     public function delete($id)
     {
+        $item = $this->findItem($id);
+
+        if (!$item) {
+            return null;
+        }
+
         return $this->model->destroy($id);
     }
 
-    // show the record with the given id
+    /**
+     * Show the record with the given id
+     *
+     * @param $id
+     *
+     * @return ResourceAbstract
+     */
     public function show($id)
     {
         return $this->model->findOrFail($id);
@@ -248,6 +298,10 @@ abstract class BaseRepository implements RepositoryInterface
 
     /**
      * Set the associated model
+     *
+     * @param Model $model
+     *
+     * @return RepositoryInterface
      */
     public function setModel($model)
     {

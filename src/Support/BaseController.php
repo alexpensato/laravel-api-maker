@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as LaravelController;
 use Illuminate\Support\Facades\Response;
 
-
 abstract class BaseController extends LaravelController
 {
     /**
@@ -64,7 +63,7 @@ abstract class BaseController extends LaravelController
      *
      * @param int $id
      *
-     * @return
+     * @return mixed
      */
     public function edit($id)
     {

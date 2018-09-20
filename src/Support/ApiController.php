@@ -8,9 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use League\Fractal\Manager;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
-use League\Fractal\Resource\ResourceAbstract;
 use League\Fractal\Serializer\DataArraySerializer;
-
 
 abstract class ApiController extends BaseController
 {
@@ -33,7 +31,21 @@ abstract class ApiController extends BaseController
      *
      * @var string
      */
-//    protected $resourceKeySingular = 'data';
+    protected $resourceKeySingular = 'data';
+
+    /**
+     * Aditional meta data added to response
+     *
+     * @var array
+     */
+    protected $metas;
+
+    /**
+     * Message to be returned after successful delete request
+     *
+     * @var array
+     */
+    protected $deleteMessage = ['message' => 'Deleted'];
 
     /**
      * Resource key for a collection.
@@ -48,11 +60,13 @@ abstract class ApiController extends BaseController
      * @param Request $request
      * @param RepositoryInterface $repositoryInterface
      */
-    public function __construct(Request $request, RepositoryInterface $repositoryInterface)
+    public function __construct(Request $request, RepositoryInterface $repositoryInterface, $metas = [])
     {
         parent::__construct($request);
 
         $this->repository = $repositoryInterface;
+
+        $this->metas = $metas;
 
         $this->fractal = new Manager();
         $this->fractal->setSerializer($this->serializer());
@@ -86,13 +100,15 @@ abstract class ApiController extends BaseController
 
         $resource = $this->repository->list($page, $size, $relations);
 
+        $resource = $this->addMetaIncludes($resource, $this->metas);
+
         $scope = $this->fractal->createData($resource);
 
         return $this->respondWithArray($scope->toArray());
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created resource in repository.
      * POST /api/{resource}.
      *
      * @return Response
@@ -112,6 +128,8 @@ abstract class ApiController extends BaseController
         }
 
         $item = $this->repository->create($data);
+
+        $item = $this->addMetaIncludes($item, $this->metas);
 
         $scope = $this->fractal->createData($item);
 
@@ -136,6 +154,8 @@ abstract class ApiController extends BaseController
             return $this->errorNotFound();
         }
 
+        $item = $this->addMetaIncludes($item, $this->metas);
+
         $scope = $this->fractal->createData($item);
 
         return $this->respondWithArray($scope->toArray());
@@ -149,8 +169,6 @@ abstract class ApiController extends BaseController
      */
     public function count()
     {
-        $relations = $this->getEagerLoad();
-
         $count = $this->repository->count();
 
         if (!$count) {
@@ -161,7 +179,7 @@ abstract class ApiController extends BaseController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified resource in repository.
      * PUT /api/{resource}/{id}.
      *
      * @param int $id
@@ -186,13 +204,15 @@ abstract class ApiController extends BaseController
             return $this->errorNotFound();
         }
 
+        $item = $this->addMetaIncludes($item, $this->metas);
+
         $scope = $this->fractal->createData($item);
 
         return $this->respondWithArray($scope->toArray());
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from repository.
      * DELETE /api/{resource}/{id}.
      *
      * @param int $id
@@ -201,15 +221,13 @@ abstract class ApiController extends BaseController
      */
     public function destroy($id)
     {
-        $item = $this->findItem($id);
+        $count = $this->repository->delete($id);
 
-        if (!$item) {
+        if (!$count || $count === 0) {
             return $this->errorNotFound();
         }
 
-        $item->delete();
-
-        return response()->json(['message' => 'Deleted']);
+        return response()->json($this->deleteMessage);
     }
 
 
@@ -240,6 +258,23 @@ abstract class ApiController extends BaseController
     protected function getScope($resource)
     {
         return $this->fractal->createData($resource);
+    }
+
+    /**
+     * Add meta information.
+     *
+     * @param Item|Collection $resource
+     * @param array
+     *
+     * @return Collection
+     */
+    protected function addMetaIncludes($resource, $metas)
+    {
+        foreach ($metas as $key => $value) {
+            $resource->setMetaValue($key, $value);
+        }
+
+        return $resource;
     }
 
 

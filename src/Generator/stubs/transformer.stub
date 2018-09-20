@@ -1,9 +1,8 @@
 <?php namespace {{transformer.namespace}};
 
 use {{model.fullName}};
-use League\Fractal\TransformerAbstract;
 
-class {{transformer.name}} extends TransformerAbstract
+class {{transformer.name}} extends BaseTransformer
 {
     /**
      * Turn this item object into a generic array.
@@ -19,4 +18,26 @@ class {{transformer.name}} extends TransformerAbstract
             'updated_at' => (string)$item->updated_at,
         ];
     }
+
+     /**
+      * Maps data from request to Model object.
+      *
+      * @param array $data
+      * @param {{model.name}} $model
+      *
+      * @return {{model.name}}
+      */
+     public function mapper($data, $model)
+     {
+         foreach ($data as $key => $value) {
+              switch ($key) {
+                 // Example of mapping name to firstName
+                 case "name":
+                     $model->setFirstName($value);
+                     break;
+              }
+         }
+
+         return $model;
+     }
 }
