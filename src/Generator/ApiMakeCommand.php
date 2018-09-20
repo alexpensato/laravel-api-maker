@@ -378,7 +378,10 @@ class ApiMakeCommand extends Command
      */
     protected function createTestClass($type)
     {
-        $path = base_path(config('laravel-api-maker.test_dir'));
+        $name = base_path(config('laravel-api-maker.test_dir') .'/'. $this->stubVariables[$type]['fullNameWithoutRoot']);
+
+        $path = $this->laravel['path'].'/'.str_replace('\\', '/', $name).'.php';
+
         if ($this->files->exists($path)) {
             $this->error(ucfirst($type).' already exists!');
 
