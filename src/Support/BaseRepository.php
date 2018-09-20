@@ -129,7 +129,7 @@ abstract class BaseRepository implements RepositoryInterface
 
         if ($size > 0) {
             $skip = ($page > 0) ? ($page-1)*$size : 0;
-            $count = $count / $size;
+            $count = $count / $size + ($count%$size > 0)?1:0;
             $list = $this->model->with($relations)->skip($skip)->limit($size)->orderBy($this->defaultOrderBy)->get();
 
         } elseif ($this->allowFullScan) {
@@ -201,7 +201,12 @@ abstract class BaseRepository implements RepositoryInterface
 
         $newData = $this->transformer->mapper($data, $record);
 
-        $item = $record->update($newData);
+        $numberOfRecords = $record->update($newData);
+        if($numberOfRecords != 1) {
+            return null;
+        }
+
+        $item = $this->model->find($id);
 
         return $this->loadResourceWithItem($item);
     }
@@ -275,7 +280,8 @@ abstract class BaseRepository implements RepositoryInterface
 
         if ($page > 0) {
             $prev = ($page > 1) ? $page-1 : null;
-            $next = $page + 1;
+            $next = ($page == $count) ? $page + 1 : null;
+
             // Cursor::__construct($current = null, $prev = null, $next = null, $count = null)
             $cursor = new Cursor($page, $prev, $next, $count);
             $resource->setCursor($cursor);
