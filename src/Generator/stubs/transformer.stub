@@ -26,19 +26,22 @@ class {{transformer.name}} extends BaseTransformer
       * @param array $data
       * @param {{model.name}} $model
       *
-      * @return {{model.name}}
+      * @return array
       */
      public function mapper($data, $model)
      {
-         foreach ($data as $key => $value) {
-              switch ($key) {
-                 // Example of mapping name to firstName
-                 case "name":
-                     $model->setFirstName($value);
-                     break;
-              }
-         }
+        $newData = [];
+        foreach ($data as $key => $value) {
+            switch ($key) {
+                // Example of mapping name to firstName
+                case "name":
+                    $newData['firstName'] = $value;
+                    break;
+            }
+        }
 
-         return $model;
+         return $newData;
      }
+
+
 }
