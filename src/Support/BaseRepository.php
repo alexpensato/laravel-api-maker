@@ -174,9 +174,9 @@ abstract class BaseRepository implements RepositoryInterface
     {
         $this->unguardIfNeeded();
 
-        $item = $this->transformer->mapper($data, $this->model);
+        $newData = $this->transformer->mapper($data, $this->model);
 
-        $record = $this->model->create($item);
+        $record = $this->model->create($newData);
 
         return $this->loadResourceWithItem($record);
     }
@@ -198,11 +198,9 @@ abstract class BaseRepository implements RepositoryInterface
             return null;
         }
 
-        $record = $this->transformer->mapper($data, $record);
+        $newData = $this->transformer->mapper($data, $record);
 
-        $record->save();
-
-        $item = $record->update($data);
+        $item = $record->update($newData);
 
         return $this->loadResourceWithItem($item);
     }
