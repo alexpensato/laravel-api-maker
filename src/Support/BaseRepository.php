@@ -283,7 +283,10 @@ abstract class BaseRepository implements RepositoryInterface
 
         if ($page > 0) {
             $prev = ($page > 1) ? $page-1 : null;
-            $next = ($page >= $count) ? $page + 1 : null;
+            $next = $page + 1;
+            if($next > $count) {
+                $next = null;
+            }
 
             // Cursor::__construct($current = null, $prev = null, $next = null, $count = null)
             $cursor = new Cursor($page, $prev, $next, $count);
