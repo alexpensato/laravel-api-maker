@@ -125,8 +125,11 @@ abstract class BaseRepository implements RepositoryInterface
     {
         $list = null;
 
+        $count = $this->count();
+
         if ($size > 0) {
             $skip = ($page > 0) ? ($page-1)*$size : 0;
+            $count = $count / $size;
             $list = $this->model->with($relations)->skip($skip)->limit($size)->orderBy($this->defaultOrderBy)->get();
 
         } elseif ($this->allowFullScan) {
@@ -135,8 +138,6 @@ abstract class BaseRepository implements RepositoryInterface
         } else {
             $list = $this->model->with($relations)->limit($this->defaultSize)->orderBy($this->defaultOrderBy)->get();
         }
-
-        $count = $this->count();
 
         return $this->loadResourceWithCollection($list, $page, $count);
     }
@@ -240,10 +241,13 @@ abstract class BaseRepository implements RepositoryInterface
      *
      * @param $item
      *
-     * @return ResourceAbstract
+     * @return ResourceAbstract|null
      */
     protected function loadResourceWithItem($item)
     {
+        if(!$item) {
+            return null;
+        }
         /** @var Item $resource */
         $resource = new Item($item, $this->transformer, $this->resourceKeySingular);
 
@@ -259,10 +263,13 @@ abstract class BaseRepository implements RepositoryInterface
      * @param $page
      * @param $count
      *
-     * @return ResourceAbstract
+     * @return ResourceAbstract|null
      */
     protected function loadResourceWithCollection($collection, $page = 0, $count = 0)
     {
+        if(!$collection) {
+            return null;
+        }
         /** @var Collection $resource */
         $resource = new Collection($collection, $this->transformer, $this->resourceKeyPlural);
 

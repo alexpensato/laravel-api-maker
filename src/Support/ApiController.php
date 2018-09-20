@@ -122,6 +122,9 @@ abstract class ApiController extends BaseController
         }
 
         $item = $this->repository->create($data);
+        if (!$item) {
+            return $this->errorInternalError('Error saving resource to repository.');
+        }
 
         $item = $this->addMetaIncludes($item, $this->metas);
 
