@@ -1,5 +1,6 @@
 <?php namespace {{transformer.namespace}};
 
+use Pensato\Api\Support\BaseTransformer;
 use {{model.fullName}};
 
 class {{transformer.name}} extends BaseTransformer

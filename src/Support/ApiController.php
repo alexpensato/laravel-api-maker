@@ -48,17 +48,11 @@ abstract class ApiController extends BaseController
     protected $deleteMessage = ['message' => 'Deleted'];
 
     /**
-     * Resource key for a collection.
-     *
-     * @var string
-     */
-//    protected $resourceKeyPlural = 'data';
-
-    /**
      * Constructor.
      *
      * @param Request $request
      * @param RepositoryInterface $repositoryInterface
+     * @param array
      */
     public function __construct(Request $request, RepositoryInterface $repositoryInterface, $metas = [])
     {

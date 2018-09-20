@@ -1,9 +1,8 @@
 <?php namespace {{controller.namespace}};
 
 use Illuminate\Http\Request;
-use Pensato\Api\Support\BaseController;
+use Pensato\Api\Support\ApiController;
 use {{repositoryInterface.fullName}};
-use {{transformer.fullName}};
 
 class {{controller.name}} extends ApiController
 {
@@ -18,15 +17,5 @@ class {{controller.name}} extends ApiController
         parent::__construct($request, $repositoryInterface);
 
         $this->middleware('cors');
-    }
-
-    /**
-     * Transformer for the current model.
-     *
-     * @return \League\Fractal\TransformerAbstract
-     */
-    protected function transformer()
-    {
-        return new {{transformer.name}};
     }
 }

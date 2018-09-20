@@ -2,10 +2,10 @@
 
 use Pensato\Api\Support\BaseRepository;
 use {{model.fullName}};
+use {{transformer.fullName}};
 
 class {{repository.name}} extends BaseRepository implements {{repositoryInterface.name}}
 {
-    //
     /**
      * Constructor to bind model to repository.
      *
@@ -15,4 +15,14 @@ class {{repository.name}} extends BaseRepository implements {{repositoryInterfac
     {
         parent::__construct($model);
     }
+
+    /**
+     * Transformer for the current model.
+     *
+     * @return \Pensato\Api\Support\BaseTransformer
+     */
+     protected function transformer()
+     {
+         return new {{transformer.name}};
+     }
 }

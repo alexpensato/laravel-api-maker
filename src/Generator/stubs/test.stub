@@ -7,7 +7,7 @@ use Faker\Factory as Faker;
 class {{test.name}} extends TestCase
 {
     /** @specify */
-    protected $pessoa;
+    protected $model;
 
     /** @specify */
     protected $jsonData;

@@ -285,7 +285,7 @@ class ApiMakeCommand extends Command
 
         // modify file
         if (strcmp($lastLine, '});') === 0) {
-            $lines[count($lines) - 1] = '    '.$stubCount;
+            $lines[count($lines) - 1] = '    '."$stubCount\r\n";
             $lines[] = '    '.$stubRoute;
             $lines[] = "\r\n});\r\n";
         } else {
