@@ -129,7 +129,10 @@ abstract class BaseRepository implements RepositoryInterface
 
         if ($size > 0) {
             $skip = ($page > 0) ? ($page-1)*$size : 0;
-            $count = $count / $size + ($count%$size > 0)?1:0;
+            $count = $count / $size;
+            if ($count%$size > 0) {
+                $count += 1;
+            }
             $list = $this->model->with($relations)->skip($skip)->limit($size)->orderBy($this->defaultOrderBy)->get();
 
         } elseif ($this->allowFullScan) {
@@ -280,7 +283,7 @@ abstract class BaseRepository implements RepositoryInterface
 
         if ($page > 0) {
             $prev = ($page > 1) ? $page-1 : null;
-            $next = ($page == $count) ? $page + 1 : null;
+            $next = ($page >= $count) ? $page + 1 : null;
 
             // Cursor::__construct($current = null, $prev = null, $next = null, $count = null)
             $cursor = new Cursor($page, $prev, $next, $count);
