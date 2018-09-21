@@ -1,28 +1,173 @@
 <?php
 namespace Tests\Feature;
 
-use Tests\TestCase;
+use Tests\GuzzleTestCase;
 use Faker\Factory as Faker;
 
-class {{test.name}} extends TestCase
+class {{test.name}} extends GuzzleTestCase
 {
-    /** @specify */
-    protected $model;
+    protected $uri = "/api/v1/{{route.name}}";
 
-    /** @specify */
+    /**
+     * @var array
+     */
     protected $jsonData;
+
+    // create attributes related to this domain below here, using @specify
 
     public function setUp()
     {
         parent::setUp();
-        // You can pass localization parameter to create function. E.g.: Faker::create('pt_BR');
-        $this->faker = Faker::create();
-        $this->jsonData = [
-            // write fake parameters here
-        ];
+
+        // create default jsonData using Faker
+        $this->jsonData = array('data' =>
+            array(
+                // write fake paramerter here
+                // Ex.: 'name' => $this->faker->firstName(),
+
+            )
+        );
+
+        // Additional authentication and authorization setUp may be required
+        // Exemple below is for applications using CAS Authentication
+        // \Config::set('cas', ['cas_pretend_user' => 'test']);
     }
 
-    // write testing specifications here
-    // E.g.: public function testSomething()
+    public function testShow{{model.fullNameWithoutRoot}}()
+    {
+        $this->describe("Show {{model.fullNameWithoutRoot}}", function () {
 
+            $this->it("response contains object requested by Id", function () {
+                // change $id to desired resource
+                $id = "1";
+                $getResponse = $this->getResponse('GET', [], "/$id");
+                expect($getResponse->getStatusCode())->equals(self::SUCCESS);
+
+                $jsonObject = $this->getJsonObjectFromResponse($getResponse);
+                $idFromResponse = $jsonObject['data']['id'];
+
+                $json = json_encode($jsonObject['data']);
+                // check if JSON contains desired parameters
+                // Ex.: expect($json)->contains("name");
+
+                expect($id)->equals($idFromResponse);
+            });
+        });
+    }
+
+    public function testList{{model.fullNameWithoutRoot}}Paginated()
+    {
+        $this->describe("List {{model.fullNameWithoutRoot}} resources paginated", function() {
+
+            $this->it("returns HTTP sucess status", function () {
+                $response = $this->getResponse("GET", ['query' => ['page' => 1, 'size' => 10]]);
+                expect($response->getStatusCode())->equals(self::SUCCESS);
+            });
+
+            $this->it("returns same page if same GET parameters are used", function () {
+                $firstResponse = $this->getJsonArray(1, 10);
+                $secondResponse = $this->getJsonArray(1, 10);
+                expect(json_encode($firstResponse))->equals(json_encode($secondResponse));
+            });
+
+            $this->it("returns the exact amount of objects requested, if available", function () {
+                $size = 10;
+                $response = $this->getJsonArray(1, $size);
+                expect(count($response))->equals($size);
+            });
+        });
+
+        $this->describe("Interop POST and GET requests to {{model.fullNameWithoutRoot}}", function() {
+
+            $this->it("returns unmodified first page data after new resource created", function () {
+                $firstResponse = $this->getJsonArray(1, 10);
+
+                $postResponse = $this->getResponse('POST', ['json' => $this->jsonData]);
+                expect($postResponse->getStatusCode())->equals(self::SUCCESS);
+
+                $secondResponse = $this->getJsonArray(1, 10);
+                expect(json_encode($firstResponse))->equals(json_encode($secondResponse));
+
+                $deleteResponse = $this->deleteGeneratedId($postResponse);
+                expect($deleteResponse->getStatusCode())->equals(self::SUCCESS);
+            });
+        });
+    }
+
+    public function testCreate{{model.fullNameWithoutRoot}}()
+    {
+        $this->describe("Create {{model.fullNameWithoutRoot}}", function () {
+
+            $this->it("response contains attributes defined by the API", function () {
+                $postResponse = $this->getResponse('POST', ['json' => $this->jsonData]);
+                expect($postResponse->getStatusCode())->equals(self::SUCCESS);
+
+                $jsonObject = $this->getJsonObjectFromResponse($postResponse);
+                $id = $jsonObject['data']['id'];
+
+                $json = json_encode($jsonObject['data']);
+                // check if JSON contains desired parameters
+                // Ex.: expect($json)->contains("name");
+
+                $deleteResponse = $this->getResponse('DELETE', [], "/$id");
+                expect($deleteResponse->getStatusCode())->equals(self::SUCCESS);
+            });
+        });
+    }
+
+    public function testUpdate{{model.fullNameWithoutRoot}}()
+    {
+        $this->describe("Update {{model.fullNameWithoutRoot}}", function () {
+
+            $this->it("response contains object with update attribute(s)", function () {
+                // change $id to desired resource
+                $id = "1";
+                $this->jsonData = array('data' =>
+                            array(
+                                // include only the attributes to be updated
+                                // Ex.: 'name' => $this->faker->firstName(),
+
+                            )
+                        );
+                $updateResponse = $this->getResponse('PUT', ['json' => $this->jsonData], "/$id");
+                expect($updateResponse->getStatusCode())->equals(self::SUCCESS);
+
+                $jsonObject = $this->getJsonObjectFromResponse($updateResponse);
+                // save values from updated attributes
+                // Ex.: $attr1 = $jsonObject['data']['attr1'];
+
+                $json = json_encode($jsonObject['data']);
+                // check if JSON contains updated parameters
+                // Ex.: expect($json)->contains("attr1");
+
+                expect($attr1)->equals('expected value');
+            });
+        });
+    }
+
+    public function testDestroy{{model.fullNameWithoutRoot}}()
+    {
+        $this->describe("Destroy resource from {{model.fullNameWithoutRoot}}", function () {
+
+            $this->it("decreases total count of resources", function () {
+                $firstCount = (int) $this->getContents('GET', [], '/count');
+
+                $postResponse = $this->getResponse('POST', ['json' => $this->jsonData]);
+                expect($postResponse->getStatusCode())->equals(self::SUCCESS);
+
+                $secondCount = (int) $this->getContents('GET', [], '/count');
+
+                expect($firstCount)->equals($secondCount - 1);
+
+                $deleteResponse = $this->deleteGeneratedId($postResponse);
+                expect($deleteResponse->getStatusCode())->equals(self::SUCCESS);
+
+                $thirdCount = (int) $this->getContents('GET', [], '/count');
+                expect($firstCount)->equals($thirdCount);
+            });
+
+        });
+    }
+
+    // write additional tests below here
 }

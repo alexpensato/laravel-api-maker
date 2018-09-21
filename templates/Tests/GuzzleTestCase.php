@@ -48,8 +48,9 @@ abstract class GuzzleTestCase extends BaseTestCase
             'base_uri' => env('BASE_URI')
         ]);
 
-        // create default jsonData using Faker
-        $this->faker = Faker::create('pt_BR');
+        // Faker may be used to create jsonData
+        // you can pass localization parameter to create function. E.g.: Faker::create('pt_BR');
+        $this->faker = Faker::create();
 
         // Example for CAS authentication
 //        \Config::set('cas', ['cas_pretend_user' => 'test']);
