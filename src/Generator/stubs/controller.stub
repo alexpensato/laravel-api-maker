@@ -14,8 +14,56 @@ class {{controller.name}} extends ApiController
      */
     public function __construct(Request $request, {{repositoryInterface.name}} $repositoryInterface)
     {
-        parent::__construct($request, $repositoryInterface);
+        parent::__construct($request, $repositoryInterface, []);
 
         $this->middleware('cors');
+    }
+
+    /**
+     * GET /api/v1/{resource}
+     */
+    public function index()
+    {
+        return parent::index($this->metas);
+    }
+
+    /**
+     * POST /api/v1/{resource}
+     */
+    public function store()
+    {
+        return parent::store($this->metas);
+    }
+
+    /**
+     * GET /api/v1/{resource}/{id}
+     */
+    public function show($id)
+    {
+        return parent::show($id, $this->metas);
+    }
+
+    /**
+     * GET /api/v1/{resource}/count
+     */
+    public function count()
+    {
+        return parent::count();
+    }
+
+    /**
+     * PUT /api/v1/{resource}/{id}
+     */
+    public function update($id)
+    {
+        return parent::update($id, $this->metas);
+    }
+
+    /**
+     * DELETE /api/v1/{resource}/{id}
+     */
+    public function destroy($id)
+    {
+        return parent::destroy($id);
     }
 }

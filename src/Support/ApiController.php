@@ -54,7 +54,7 @@ abstract class ApiController extends BaseController
      * @param RepositoryInterface $repositoryInterface
      * @param array
      */
-    public function __construct(Request $request, RepositoryInterface $repositoryInterface, $metas = [])
+    public function __construct(Request $request, RepositoryInterface $repositoryInterface, $metas)
     {
         parent::__construct($request);
 
@@ -82,11 +82,13 @@ abstract class ApiController extends BaseController
 
     /**
      * Display a listing of the resource.
-     * GET /api/{resource}.
+     * GET /api/v1/{resource}.
+     *
+     * @param array $metas
      *
      * @return Response
      */
-    public function index()
+    public function index(array $metas)
     {
         $relations = $this->getEagerLoad();
         $page = (int) $this->request->input('page');
@@ -94,7 +96,7 @@ abstract class ApiController extends BaseController
 
         $resource = $this->repository->list($page, $size, $relations);
 
-        $resource = $this->addMetaIncludes($resource, $this->metas);
+        $resource = $this->addMetaIncludes($resource, $metas);
 
         $scope = $this->fractal->createData($resource);
 
@@ -103,11 +105,13 @@ abstract class ApiController extends BaseController
 
     /**
      * Store a newly created resource in repository.
-     * POST /api/{resource}.
+     * POST /api/v1/{resource}.
+     *
+     * @param array $metas
      *
      * @return Response
      */
-    public function store()
+    public function store(array $metas)
     {
         $data = $this->request->json()->get($this->resourceKeySingular);
 
@@ -126,7 +130,7 @@ abstract class ApiController extends BaseController
             return $this->errorInternalError('Error saving resource to repository.');
         }
 
-        $item = $this->addMetaIncludes($item, $this->metas);
+        $item = $this->addMetaIncludes($item, $metas);
 
         $scope = $this->fractal->createData($item);
 
@@ -135,13 +139,14 @@ abstract class ApiController extends BaseController
 
     /**
      * Display the specified resource.
-     * GET /api/{resource}/{id}.
+     * GET /api/v1/{resource}/{id}.
      *
      * @param int $id
+     * @param array $metas
      *
      * @return Response
      */
-    public function show($id)
+    public function show($id, array $metas)
     {
         $relations = $this->getEagerLoad();
 
@@ -151,7 +156,7 @@ abstract class ApiController extends BaseController
             return $this->errorNotFound();
         }
 
-        $item = $this->addMetaIncludes($item, $this->metas);
+        $item = $this->addMetaIncludes($item, $metas);
 
         $scope = $this->fractal->createData($item);
 
@@ -160,7 +165,7 @@ abstract class ApiController extends BaseController
 
     /**
      * Display the count of the specified resource.
-     * GET /api/{resource}/count.
+     * GET /api/v1/{resource}/count.
      *
      * @return Response
      */
@@ -180,10 +185,11 @@ abstract class ApiController extends BaseController
      * PUT /api/{resource}/{id}.
      *
      * @param int $id
+     * @param array $metas
      *
      * @return Response
      */
-    public function update($id)
+    public function update($id, array $metas)
     {
         $data = $this->request->json()->get($this->resourceKeySingular);
 
@@ -201,7 +207,7 @@ abstract class ApiController extends BaseController
             return $this->errorNotFound();
         }
 
-        $item = $this->addMetaIncludes($item, $this->metas);
+        $item = $this->addMetaIncludes($item, $metas);
 
         $scope = $this->fractal->createData($item);
 
