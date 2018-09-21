@@ -120,8 +120,11 @@ abstract class BaseRepository implements RepositoryInterface
 
         $count = $this->count();
 
-        if ($size > 0) {
-            $skip = ($page > 0) ? ($page-1)*$size : 0;
+        if ($page > 0) {
+            if(!$size || $size <= 0) {
+                $size = $this->defaultSize;
+            }
+            $skip = ($page-1) * $size;
             $count = $count / $size;
             if ($count%$size > 0) {
                 $count += 1;
