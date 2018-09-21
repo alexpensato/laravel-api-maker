@@ -8,7 +8,6 @@ use Faker\Factory as Faker;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Orchestra\Testbench\Concerns\CreatesApplication;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -31,11 +30,6 @@ abstract class GuzzleTestCase extends BaseTestCase
     protected $client;
 
     /**
-     * @var Faker
-     */
-    protected $faker;
-
-    /**
      * Set up the test
      */
     protected function setUp()
@@ -48,12 +42,9 @@ abstract class GuzzleTestCase extends BaseTestCase
             'base_uri' => env('BASE_URI')
         ]);
 
-        // Faker may be used to create jsonData
-        // you can pass localization parameter to create function. E.g.: Faker::create('pt_BR');
-        $this->faker = Faker::create();
-
-        // Example for CAS authentication
-//        \Config::set('cas', ['cas_pretend_user' => 'test']);
+        // Additional authentication and authorization setUp may be required
+        // Exemple below is for applications using CAS Authentication
+        // \Config::set('cas', ['cas_pretend_user' => 'test']);
     }
 
     /**
