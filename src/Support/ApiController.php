@@ -38,7 +38,7 @@ abstract class ApiController extends BaseController
      *
      * @var array
      */
-    protected $metas;
+    protected $metaInfo;
 
     /**
      * Message to be returned after successful delete request
@@ -54,13 +54,13 @@ abstract class ApiController extends BaseController
      * @param RepositoryInterface $repositoryInterface
      * @param array
      */
-    public function __construct(Request $request, RepositoryInterface $repositoryInterface, $metas)
+    public function __construct(Request $request, RepositoryInterface $repositoryInterface, $metaInfo)
     {
         parent::__construct($request);
 
         $this->repository = $repositoryInterface;
 
-        $this->metas = $metas;
+        $this->metas = $metaInfo;
 
         $this->fractal = new Manager();
         $this->fractal->setSerializer($this->serializer());
@@ -84,11 +84,11 @@ abstract class ApiController extends BaseController
      * Display a listing of the resource.
      * GET /api/v1/{resource}.
      *
-     * @param array $metas
+     * @param array $metaInfo
      *
      * @return Response
      */
-    public function index(array $metas)
+    public function indexWithMetaReponse(array $metaInfo)
     {
         $relations = $this->getEagerLoad();
         $page = (int) $this->request->input('page');
@@ -96,7 +96,7 @@ abstract class ApiController extends BaseController
 
         $resource = $this->repository->list($page, $size, $relations);
 
-        $resource = $this->addMetaIncludes($resource, $metas);
+        $resource = $this->addMetaIncludes($resource, $metaInfo);
 
         $scope = $this->fractal->createData($resource);
 
@@ -107,11 +107,11 @@ abstract class ApiController extends BaseController
      * Store a newly created resource in repository.
      * POST /api/v1/{resource}.
      *
-     * @param array $metas
+     * @param array $metaInfo
      *
      * @return Response
      */
-    public function store(array $metas)
+    public function storeWithMetaReponse(array $metaInfo)
     {
         $data = $this->request->json()->get($this->resourceKeySingular);
 
@@ -130,7 +130,7 @@ abstract class ApiController extends BaseController
             return $this->errorInternalError('Error saving resource to repository.');
         }
 
-        $item = $this->addMetaIncludes($item, $metas);
+        $item = $this->addMetaIncludes($item, $metaInfo);
 
         $scope = $this->fractal->createData($item);
 
@@ -142,11 +142,11 @@ abstract class ApiController extends BaseController
      * GET /api/v1/{resource}/{id}.
      *
      * @param int $id
-     * @param array $metas
+     * @param array $metaInfo
      *
      * @return Response
      */
-    public function show($id, array $metas)
+    public function showWithMetaReponse($id, array $metaInfo)
     {
         $relations = $this->getEagerLoad();
 
@@ -156,7 +156,7 @@ abstract class ApiController extends BaseController
             return $this->errorNotFound();
         }
 
-        $item = $this->addMetaIncludes($item, $metas);
+        $item = $this->addMetaIncludes($item, $metaInfo);
 
         $scope = $this->fractal->createData($item);
 
@@ -185,11 +185,11 @@ abstract class ApiController extends BaseController
      * PUT /api/{resource}/{id}.
      *
      * @param int $id
-     * @param array $metas
+     * @param array $metaInfo
      *
      * @return Response
      */
-    public function update($id, array $metas)
+    public function updateWithMetaReponse($id, array $metaInfo)
     {
         $data = $this->request->json()->get($this->resourceKeySingular);
 
@@ -207,7 +207,7 @@ abstract class ApiController extends BaseController
             return $this->errorNotFound();
         }
 
-        $item = $this->addMetaIncludes($item, $metas);
+        $item = $this->addMetaIncludes($item, $metaInfo);
 
         $scope = $this->fractal->createData($item);
 
@@ -267,13 +267,13 @@ abstract class ApiController extends BaseController
      * Add meta information.
      *
      * @param Item|Collection $resource
-     * @param array
+     * @param array $metaInfo
      *
      * @return Collection
      */
-    protected function addMetaIncludes($resource, $metas)
+    protected function addMetaIncludes($resource, $metaInfo)
     {
-        foreach ($metas as $key => $value) {
+        foreach ($metaInfo as $key => $value) {
             $resource->setMetaValue($key, $value);
         }
 
