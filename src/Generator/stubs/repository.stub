@@ -11,16 +11,6 @@ class {{repository.name}} extends BaseRepository implements {{repositoryInterfac
      */
     public function __construct({{model.name}} $model)
     {
-        parent::__construct($model);
+        parent::__construct($model, new {{transformer.name}});
     }
-
-    /**
-     * Transformer for the current model.
-     *
-     * @return \Pensato\Api\Support\BaseTransformer
-     */
-     protected function transformer()
-     {
-         return new {{transformer.name}};
-     }
 }

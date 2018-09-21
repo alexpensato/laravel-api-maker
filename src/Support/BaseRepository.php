@@ -76,21 +76,14 @@ abstract class BaseRepository implements RepositoryInterface
      * Constructor to bind model to repo.
      *
      * @param Model $model
+     * @param \Pensato\Api\Support\BaseTransformer
      */
-    public function __construct(Model $model)
+    public function __construct(Model $model, $transformer)
     {
         $this->model = $model;
 
-        $this->transformer = $this->transformer();
+        $this->transformer = $transformer;
     }
-
-    /**
-     * Transformer for the current model.
-     *
-     * @return BaseTransformer
-     */
-    abstract protected function transformer();
-
 
     /**
      * Get all instances of model with relations
