@@ -60,7 +60,7 @@ abstract class ApiController extends BaseController
 
         $this->repository = $repositoryInterface;
 
-        $this->metas = $metaInfo;
+        $this->metaInfo = $metaInfo;
 
         $this->fractal = new Manager();
         $this->fractal->setSerializer($this->serializer());
@@ -88,7 +88,7 @@ abstract class ApiController extends BaseController
      *
      * @return Response
      */
-    public function indexWithMetaReponse(array $metaInfo)
+    public function indexWithMetaReponse($metaInfo)
     {
         $relations = $this->getEagerLoad();
         $page = (int) $this->request->input('page');
@@ -111,7 +111,7 @@ abstract class ApiController extends BaseController
      *
      * @return Response
      */
-    public function storeWithMetaReponse(array $metaInfo)
+    public function storeWithMetaReponse($metaInfo)
     {
         $data = $this->request->json()->get($this->resourceKeySingular);
 
@@ -146,7 +146,7 @@ abstract class ApiController extends BaseController
      *
      * @return Response
      */
-    public function showWithMetaReponse($id, array $metaInfo)
+    public function showWithMetaReponse($id, $metaInfo)
     {
         $relations = $this->getEagerLoad();
 
@@ -189,7 +189,7 @@ abstract class ApiController extends BaseController
      *
      * @return Response
      */
-    public function updateWithMetaReponse($id, array $metaInfo)
+    public function updateWithMetaReponse($id, $metaInfo)
     {
         $data = $this->request->json()->get($this->resourceKeySingular);
 
@@ -242,7 +242,7 @@ abstract class ApiController extends BaseController
      *
      * @return mixed
      */
-    protected function findItem($id, array $relations = [])
+    protected function findItem($id, $relations = [])
     {
         if ($this->request->has('use_as_id')) {
             return $this->repository->findItem($id, $relations, $this->request->input('use_as_id'));
