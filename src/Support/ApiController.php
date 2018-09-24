@@ -88,7 +88,7 @@ abstract class ApiController extends BaseController
      *
      * @return Response
      */
-    public function indexWithMetaReponse($metaInfo)
+    public function indexWithMetaResponse($metaInfo)
     {
         $relations = $this->getEagerLoad();
         $page = (int) $this->request->input('page');
@@ -111,7 +111,7 @@ abstract class ApiController extends BaseController
      *
      * @return Response
      */
-    public function storeWithMetaReponse($metaInfo)
+    public function storeWithMetaResponse($metaInfo)
     {
         $data = $this->request->json()->get($this->resourceKeySingular);
 
@@ -146,7 +146,7 @@ abstract class ApiController extends BaseController
      *
      * @return Response
      */
-    public function showWithMetaReponse($id, $metaInfo)
+    public function showWithMetaResponse($id, $metaInfo)
     {
         $relations = $this->getEagerLoad();
 
@@ -189,7 +189,7 @@ abstract class ApiController extends BaseController
      *
      * @return Response
      */
-    public function updateWithMetaReponse($id, $metaInfo)
+    public function updateWithMetaResponse($id, $metaInfo)
     {
         $data = $this->request->json()->get($this->resourceKeySingular);
 
