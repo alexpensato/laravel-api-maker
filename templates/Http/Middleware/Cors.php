@@ -17,10 +17,15 @@ class Cors
      */
     public function handle($request, Closure $next, $guard = null)
     {
-        header('Access-Control-Allow-Origin: '.env('FRONTEND_URL'));
-        header('Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE');
-        header('Access-Control-Allow-Headers: X-Requested-With,content-type');
-        header('Access-Control-Allow-Credentials: true');
+        if( ! $this->app->environment('testing')) {
+            // referer and origin are returning null
+            // TODO: need to check host with array from . env('FRONTEND_URL'));
+            header('Access-Control-Allow-Origin: ' . $request->headers->get('origin') . "");
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE');
+            header('Access-Control-Max-Age: 3600');
+            header('Access-Control-Allow-Headers: Content-Type, Accept, X-Requested-With, remember-me, Authorization');
+        }
         
         return $next($request);
     }
