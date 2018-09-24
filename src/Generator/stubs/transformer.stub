@@ -20,16 +20,16 @@ class {{transformer.name}} extends BaseTransformer
         ];
     }
 
-     /**
-      * Maps data from request to Model object.
-      *
-      * @param array $data
-      * @param {{model.name}} $model
-      *
-      * @return array
-      */
-     public function mapper($data, $model)
-     {
+    /**
+     * Maps data from request to Model object.
+     *
+     * @param array $data
+     * @param {{model.name}} $model
+     *
+     * @return array
+     */
+    public function mapper($data, $model)
+    {
         $newData = [];
         foreach ($data as $key => $value) {
             switch ($key) {
@@ -39,9 +39,7 @@ class {{transformer.name}} extends BaseTransformer
                     break;
             }
         }
-
-         return $newData;
-     }
-
+        return $newData;
+    }
 
 }
