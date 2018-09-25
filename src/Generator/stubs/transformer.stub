@@ -13,11 +13,24 @@ class {{transformer.name}} extends BaseTransformer
      */
     public function transform({{model.name}} $item)
     {
-        return [
+        $fields = [
             'id' => (int)$item->id,
             'created_at' => (string)$item->created_at,
             'updated_at' => (string)$item->updated_at,
         ];
+
+        // Volatile fields are passed by collection methods of the repository
+        if(! $this->volatileFields.isEmpty()) {
+            foreach ($this->volatileFields as $field) {
+                switch ($field) {
+                    case "friendlyName":
+                        $fields['friendlyName'] = (string)$item->name;
+                        break;
+                }
+            }
+        }
+
+        return $fields;
     }
 
     /**
