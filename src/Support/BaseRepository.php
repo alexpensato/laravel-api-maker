@@ -18,7 +18,7 @@ abstract class BaseRepository implements RepositoryInterface
     /**
      * Fractal Transformer instance.
      *
-     * @var \League\Fractal\TransformerAbstract
+     * @var \Pensato\Api\Support\BaseTransformer
      */
     protected $transformer;
 
@@ -108,13 +108,14 @@ abstract class BaseRepository implements RepositoryInterface
     /**
      * Get all instances of model with relations, paginated or not
      *
-     * @param array $relations
      * @param int   $page
      * @param int   $size
+     * @param array $relations
+     * @param array $volatileFields
      *
      * @return ResourceAbstract
      */
-    public function list(int $page, int $size, array $relations = [])
+    public function list(int $page, int $size, array $relations = [], array $volatileFields = [])
     {
         $list = null;
 
@@ -138,7 +139,7 @@ abstract class BaseRepository implements RepositoryInterface
             $list = $this->model->with($relations)->limit($this->defaultSize)->orderBy($this->defaultOrderBy)->get();
         }
 
-        return $this->loadResourceWithCollection($list, $page, $count);
+        return $this->loadResourceWithCollection($list, $page, $count, $volatileFields);
     }
 
     /**
@@ -278,14 +279,18 @@ abstract class BaseRepository implements RepositoryInterface
      * @param $collection
      * @param $page
      * @param $count
+     * @param $volatileFields
      *
      * @return ResourceAbstract|null
      */
-    protected function loadResourceWithCollection($collection, $page = 0, $count = 0)
+    protected function loadResourceWithCollection($collection, $page = 0, $count = 0, $volatileFields = [])
     {
         if(!$collection) {
             return null;
         }
+
+        $this->transformer->setVolatileFields($volatileFields);
+
         /** @var Collection $resource */
         $resource = new Collection($collection, $this->transformer, $this->resourceKeyPlural);
 
