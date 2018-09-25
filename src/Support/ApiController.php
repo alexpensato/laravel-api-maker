@@ -85,16 +85,17 @@ abstract class ApiController extends BaseController
      * GET /api/v1/{resource}.
      *
      * @param array $metaInfo
+     * @param array $volatileFields
      *
      * @return Response
      */
-    public function indexWithMetaResponse($metaInfo)
+    public function indexWithMetaResponse($metaInfo, $volatileFields = [])
     {
         $relations = $this->getEagerLoad();
         $page = (int) $this->request->input('page');
         $size = (int) $this->request->input('size');
 
-        $resource = $this->repository->list($page, $size, $relations);
+        $resource = $this->repository->list($page, $size, $relations, $volatileFields);
 
         $resource = $this->addMetaIncludes($resource, $metaInfo);
 
