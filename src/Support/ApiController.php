@@ -95,6 +95,13 @@ abstract class ApiController extends BaseController
         $page = (int) $this->request->input('page');
         $size = (int) $this->request->input('size');
 
+        if (empty($volatileFields)) {
+            $strVolatile = (String) $this->request->input('volatileFields');
+            if(! empty($strVolatile)) {
+                $volatileFields = explode(',', $strVolatile);
+            }
+        }
+
         $resource = $this->repository->list($page, $size, $relations, $volatileFields);
 
         $resource = $this->addMetaIncludes($resource, $metaInfo);
