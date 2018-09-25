@@ -152,15 +152,27 @@ abstract class BaseRepository implements RepositoryInterface
      */
     public function findItem($id, array $relations = [], string $useAsId = null)
     {
-        $item = null;
-
-        if (empty($useAsId)) {
-            $item = $this->model->with($relations)->find($id);
-        } else {
-            $item = $this->model->with($relations)->where($useAsId, '=', $id)->first();
-        }
+        $item = $this->findModel($id, $relations, $useAsId);
 
         return $this->loadResourceWithItem($item);
+    }
+
+    /**
+     * Find Model by id
+     *
+     * @param $id
+     * @param array $relations
+     * @param string $useAsId
+     *
+     * @return Model
+     */
+    protected function findModel($id, array $relations = [], string $useAsId = null)
+    {
+        if (empty($useAsId)) {
+            return $this->model->with($relations)->find($id);
+        } else {
+            return $this->model->with($relations)->where($useAsId, '=', $id)->first();
+        }
     }
 
     /**
