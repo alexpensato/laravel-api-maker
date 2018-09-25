@@ -20,7 +20,7 @@ class {{transformer.name}} extends BaseTransformer
         ];
 
         // Volatile fields are passed by collection methods of the repository
-        if (! empty($volatileFields)) {
+        if (! empty($this->volatileFields)) {
             foreach ($this->volatileFields as $field) {
                 switch ($field) {
                     case "friendlyName":
