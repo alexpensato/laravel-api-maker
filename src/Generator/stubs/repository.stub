@@ -9,8 +9,8 @@ class {{repository.name}} extends BaseRepository implements {{repositoryInterfac
     /**
      * Constructor to bind model to repository.
      */
-    public function __construct({{model.name}} $model)
+    public function __construct()
     {
-        parent::__construct($model, new {{transformer.name}});
+        parent::__construct(new {{model.name}}(), new {{transformer.name}}());
     }
 }

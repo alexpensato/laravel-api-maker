@@ -254,6 +254,35 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
+     * Associate multiple resources with another class they belong to
+     *
+     * @param string $class
+     * @param int $id
+     * @param array $ids
+     *
+     * @return int|string
+     */
+    public function associate($class, $id, $ids)
+    {
+        /** @var BaseRepository $repo */
+        $repo = new $class;
+        $object = $repo->findModel($id);
+
+        if(empty($object)) {
+            return "Object to be associated with not found! ID: " . $id;
+        }
+
+        $models = $this->findModel($ids);
+        $result = "Invalid association list. Please check the request body.";
+        if (!empty($models)) {
+            $result = $this->model->whereIn($this->model->getKeyName(), $ids)->update([$object->getKeyName() => $id]);
+        }
+
+        return $result;
+    }
+
+
+    /**
      * Load Fractal Resource with a given item.
      *
      * @param $item

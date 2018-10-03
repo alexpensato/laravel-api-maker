@@ -66,4 +66,12 @@ class {{controller.name}} extends ApiController
     {
         return parent::destroy($id);
     }
+
+    /**
+     * PATCH /api/v1/{resource
+     */
+    public function associate()
+    {
+        return parent::associate();
+    }
 }

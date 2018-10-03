@@ -1,0 +1,1 @@
+Route::patch('{{route.name}}', 'Api\{{model.fullNameWithoutRoot}}Controller@associate');

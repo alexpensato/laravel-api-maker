@@ -63,10 +63,14 @@ return [
     'route_stub'       => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/route.stub',
 
     /*
-     * Relative path from the base directory to the route stub.
+     * Relative path from the base directory to the count route stub.
      */
     'count_stub'       => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/count.stub',
 
+    /*
+     * Relative path from the base directory to the associate route stub.
+     */
+    'associate_stub'       => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/associate.stub',
 
     /*
      * Relative path from the base directory to the provider stub.

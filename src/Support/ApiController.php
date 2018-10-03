@@ -241,6 +241,90 @@ abstract class ApiController extends BaseController
         return response()->json($this->deleteMessage);
     }
 
+    /**
+     * Associate a list of resources provided in the request body with another resource they belong to
+     * PATCH /api/v1/{resource}
+     *
+     * @return Response
+     */
+    public function associate()
+    {
+        $str = $this->request->query('belongs_to');
+
+        if ($str) {
+            return $this->associateHasMany($str);
+        }
+
+        $str = $this->request->query('attach');
+
+        if ($str) {
+            return $this->attachManyToMany($str);
+        }
+
+        return $this->errorWrongArgs("Missing 'belongs_to' query parameter.");
+    }
+
+    /**
+     * Associate using OneToMany relation
+     * Query string: ?belongs_to={model_name}
+     *
+     * @param string $str
+     *
+     * @return Response
+     */
+    protected function associateHasMany($str)
+    {
+        $str = $this->request->query('belongs_to');
+
+        if (!$str) {
+            return $this->errorWrongArgs("Missing 'belongs_to' query parameter.");
+        }
+
+        $objectName = str_replace('-', '', ucwords($str, '-'));
+        $repositoryFullName = get_class($this->repository);
+        $exploded = explode('\\',$repositoryFullName);
+        $repositoryName = end($exploded);
+        $repositoryName = str_replace($repositoryName,$objectName . 'Repository', $repositoryFullName);
+
+        $objectName = lcfirst($objectName);
+        $objectData = $this->request->json()->get($objectName);
+        if (!$objectData) {
+            return $this->errorWrongArgs("Parameter '" . $objectName . "' not found in the request body.");
+        }
+        if (!$objectData['id']) {
+            return $this->errorWrongArgs("Parameter 'id' not found in the request body.");
+        }
+
+        $uri = $this->request->path();
+        $exploded = explode('/',$uri);
+        $routeName = end($exploded);
+        if (!$objectData[$routeName]) {
+            return $this->errorWrongArgs("Parameter '" . $routeName . "' not found in the request body.");
+        }
+
+        $response = $this->repository->associate($repositoryName, $objectData['id'], $objectData[$routeName]);
+
+        if (is_string($response)) {
+            return $this->errorWrongArgs($response);
+        }
+
+        return response()->json(['updated_resources' => $response]);
+    }
+
+    /**
+     * Associate using ManyToMany relation
+     * Query string: ?attach={model_name}
+     *
+     * @param string $str
+     *
+     * @return Response
+     */
+    protected function attachManyToMany($str)
+    {
+        return response()->json(['message' => 'under development']);
+    }
+
+
 
     /**
      * Get item according to mode.
