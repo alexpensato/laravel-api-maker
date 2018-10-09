@@ -112,34 +112,49 @@ abstract class BaseRepository implements RepositoryInterface
      * @param int   $size
      * @param array $relations
      * @param array $volatileFields
+     * @param array $filters
      *
      * @return ResourceAbstract
      */
-    public function list(int $page, int $size, array $relations = [], array $volatileFields = [])
+    public function list(int $page, int $size, array $relations = [], array $volatileFields = [], array $filters = [])
     {
-        $list = null;
+        $query = $this->model->with($relations);
 
-        $count = $this->count();
-
-        if ($page > 0) {
-            if(!$size || $size <= 0) {
-                $size = $this->defaultSize;
-            }
-            $skip = ($page-1) * $size;
-            $count = $count / $size;
-            if ($count%$size > 0) {
-                $count += 1;
-            }
-            $list = $this->model->with($relations)->skip($skip)->limit($size)->orderBy($this->defaultOrderBy)->get();
-
-        } elseif ($this->allowFullScan) {
-            $list = $this->model->with($relations)->orderBy($this->defaultOrderBy)->get();
-
-        } else {
-            $list = $this->model->with($relations)->limit($this->defaultSize)->orderBy($this->defaultOrderBy)->get();
+        foreach ($filters as $field => $value) {
+            $query = $this->applyFilter($query, $field, $value);
         }
 
+        $count = $query->count();
+
+        if ($page > 0) {
+            if ($size <= 0) {
+                $size = $this->defaultSize;
+            }
+
+            $skip = ($page - 1) * $size;
+            $count = ceil($count / $size);
+
+            $query = $query->skip($skip)->limit($size);
+
+        } elseif (!$this->allowFullScan) {
+            $query = $query->limit($this->defaultSize);
+        }
+
+        $list = $query->orderBy($this->defaultOrderBy)->get();
+
         return $this->loadResourceWithCollection($list, $page, $count, $volatileFields);
+    }
+
+    /**
+     * @param $query
+     * @param string $fieldName
+     * @param string $value
+     *
+     * @return mixed
+     */
+    protected function applyFilter($query, string $fieldName, $value)
+    {
+        return $query->where($fieldName, '=', $value);
     }
 
     /**
@@ -281,6 +296,47 @@ abstract class BaseRepository implements RepositoryInterface
         return $result;
     }
 
+    /**
+     * @param string $relation
+     * @param int $id
+     * @param array $ids
+     *
+     * @return boolean
+     */
+    public function attach($relation, $id, $ids)
+    {
+        try {
+            $this->findModel($id, [$relation])->$relation()->attach($ids);
+            
+            return true;
+            
+        } catch (Exception $e) {
+            report($e);
+
+            return false;
+        }
+    }
+
+    /**
+     * @param string $relation
+     * @param int $id
+     * @param array $ids
+     *
+     * @return boolean
+     */
+    public function detach($relation, $id, $ids)
+    {
+        try {
+            $this->findModel($id, [$relation])->$relation()->detach($ids);
+
+            return true;
+
+        } catch (Exception $e) {
+            report($e);
+
+            return false;
+        }
+    }
 
     /**
      * Load Fractal Resource with a given item.

@@ -261,7 +261,13 @@ abstract class ApiController extends BaseController
             return $this->attachManyToMany($str);
         }
 
-        return $this->errorWrongArgs("Missing 'belongs_to' query parameter.");
+        $str = $this->request->query('detach');
+
+        if ($str) {
+            return $this->attachManyToMany($str, 'detach');
+        }
+
+        return $this->errorWrongArgs("Missing attach, detach or belongs_to parameters in the query string.");
     }
 
     /**
@@ -274,12 +280,6 @@ abstract class ApiController extends BaseController
      */
     protected function associateHasMany($str)
     {
-        $str = $this->request->query('belongs_to');
-
-        if (!$str) {
-            return $this->errorWrongArgs("Missing 'belongs_to' query parameter.");
-        }
-
         $objectName = str_replace('-', '', ucwords($str, '-'));
         $repositoryFullName = get_class($this->repository);
         $exploded = explode('\\',$repositoryFullName);
@@ -313,15 +313,54 @@ abstract class ApiController extends BaseController
 
     /**
      * Associate using ManyToMany relation
-     * Query string: ?attach={model_name}
+     * Query string: ?attach={model_name} or ?detach={model_name}
      *
      * @param string $str
+     * @param string $type
      *
      * @return Response
      */
-    protected function attachManyToMany($str)
+    protected function attachManyToMany($str, $type = 'attach')
     {
-        return response()->json(['message' => 'under development']);
+        $relation = str_replace('-', '', $str);
+
+        $uri = $this->request->path();
+        $exploded = explode('/', $uri);
+        $routeName = end($exploded);
+        $objectName = str_replace('-', '', $routeName);
+
+        $objectArray = $this->request->json()->get($objectName);
+        if (!$objectArray) {
+            return $this->errorWrongArgs("Array parameter '" . $objectName . "' not found in the request body.");
+        }
+
+        foreach ($objectArray as $objectData) {
+            if (!$objectData['id']) {
+                return $this->errorWrongArgs("Parameter 'id' not found in the request body.");
+            }
+            if (!$objectData[$relation]) {
+                return $this->errorWrongArgs("Parameter '" . $relation . "' not found in the request body.");
+            }
+        }
+
+        $commited = array();
+        $errors = array();
+        $response = false;
+        foreach ($objectArray as $objectData) {
+            if($type == 'detach') {
+                $response = $this->repository->detach($relation, $objectData['id'], $objectData[$relation]);
+            } else {
+                $response = $this->repository->attach($relation, $objectData['id'], $objectData[$relation]);
+            }
+
+            if($response) {
+                $commited[] = $objectData['id'];
+            } else {
+                $errors[] = $objectData['id'];
+            }
+        }
+
+        return response()->json([$type.'ed_resources' => $commited, 'errors' => $errors]);
     }
 
 

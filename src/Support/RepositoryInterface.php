@@ -21,4 +21,8 @@ interface RepositoryInterface
     public function show($id);
 
     public function associate($class, $id, $ids);
+
+    public function attach($relation, $id, $ids);
+
+    public function detach($relation, $id, $ids);
 }
