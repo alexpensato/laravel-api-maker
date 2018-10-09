@@ -58,6 +58,11 @@ return [
     'controller_stub'  => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/controller.stub',
 
     /*
+     * Relative path from the base directory to the api controller stub.
+     */
+    'controller_readonly_stub'  => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/controller_readonly.stub',
+
+    /*
      * Relative path from the base directory to the route stub.
      */
     'route_stub'       => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/route.stub',
@@ -83,7 +88,12 @@ return [
     'transformer_stub' => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/transformer.stub',
 
     /*
-     * Relative path from the base directory to the transformer stub.
+     * Relative path from the base directory to the test stub.
      */
     'test_stub' => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/test.stub',
+
+    /*
+     * Relative path from the base directory to the read only test stub.
+     */
+    'test_readonly_stub' => 'vendor/alexpensato/laravel-api-maker/src/Generator/stubs/test_readonly.stub',
 ];

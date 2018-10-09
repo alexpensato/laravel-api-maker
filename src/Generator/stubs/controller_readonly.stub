@@ -1,0 +1,53 @@
+<?php namespace {{controller.namespace}};
+
+use Illuminate\Http\Request;
+use Pensato\Api\Support\ReadOnlyController;
+use {{repositoryInterface.fullName}};
+
+class {{controller.name}} extends ReadOnlyController
+{
+    /**
+     * Constructor.
+     *
+     * @param {{repositoryInterface.name}} $repositoryInterface
+     * @param Request $request
+     */
+    public function __construct(Request $request, {{repositoryInterface.name}} $repositoryInterface)
+    {
+        parent::__construct($request, $repositoryInterface, []);
+
+        $this->middleware('cors');
+    }
+
+    /**
+     * GET /api/v1/{resource}
+     */
+    public function index()
+    {
+        return parent::indexWithMetaResponse($this->metaInfo);
+    }
+
+    /**
+     * GET /api/v1/{resource}/{id}
+     */
+    public function show($id)
+    {
+        return parent::showWithMetaResponse($id, $this->metaInfo);
+    }
+
+    /**
+     * GET /api/v1/{resource}/count
+     */
+    public function count()
+    {
+        return parent::count();
+    }
+
+    /**
+     * PATCH /api/v1/{resource
+     */
+    public function associate()
+    {
+        return parent::associate();
+    }
+}

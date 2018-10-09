@@ -20,11 +20,18 @@ class ApiMakeCommand extends Command
     protected $files;
 
     /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'make:api {modelName} {--readonly}';
+
+    /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'make:api';
+//    protected $name = 'make:api';
 
     /**
      * The console command description.
@@ -33,6 +40,13 @@ class ApiMakeCommand extends Command
      */
     protected $description = 'Create api controller, transformer, repository, routes and BDD-style unit tests for a given model (alexpensato/laravel-api-maker)';
 
+
+    /**
+     * Is this API read only or not?
+     *
+     * @var bool
+     */
+    protected $readOnly = false;
     /**
      * The array of variables available in stubs.
      *
@@ -72,7 +86,11 @@ class ApiMakeCommand extends Command
      */
     public function handle()
     {
-        $this->prepareVariablesForStubs($this->argument('name'));
+        if($this->option('readonly')){
+            $this->readOnly = true;
+        }
+
+        $this->prepareVariablesForStubs($this->argument('modelName'));
 
         $this->createRepositoryInterface();
 
@@ -367,7 +385,12 @@ class ApiMakeCommand extends Command
 
         $this->makeDirectoryIfNeeded($path);
 
-        $this->files->put($path, $this->constructStub(base_path(config('laravel-api-maker.'.$type.'_stub'))));
+        $complement = '';
+        if ($this->readOnly && $type == 'controller') {
+            $complement = '_readonly';
+        }
+
+        $this->files->put($path, $this->constructStub(base_path(config('laravel-api-maker.'.$type.$complement.'_stub'))));
 
         $this->info(ucfirst($type).' created successfully.');
     }
@@ -393,7 +416,12 @@ class ApiMakeCommand extends Command
 
         $this->makeDirectoryIfNeeded($path);
 
-        $this->files->put($path, $this->constructStub(base_path(config('laravel-api-maker.'.$type.'_stub'))));
+        $complement = '';
+        if ($this->readOnly) {
+            $complement = '_readonly';
+        }
+
+        $this->files->put($path, $this->constructStub(base_path(config('laravel-api-maker.'.$type.$complement.'_stub'))));
 
         $this->info(ucfirst($type).' created successfully.');
     }

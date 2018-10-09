@@ -1,0 +1,64 @@
+<?php
+namespace Tests\Feature;
+
+use Tests\GuzzleTestCase;
+
+class {{test.name}} extends GuzzleTestCase
+{
+    protected $uri = "/api/v1/{{route.name}}";
+
+
+    // create attributes related to this domain below here, using @specify
+
+    public function setUp()
+    {
+        parent::setUp();
+    }
+
+    public function testShow{{model.fullNameWithoutRoot}}()
+    {
+        $this->describe("Show {{model.fullNameWithoutRoot}}", function () {
+
+            $this->it("response contains object requested by Id", function () {
+                // change $id to desired resource
+                $id = "1";
+                $getResponse = $this->getResponse('GET', [], "/$id");
+                expect($getResponse->getStatusCode())->equals(self::SUCCESS);
+
+                $jsonObject = $this->getJsonObjectFromResponse($getResponse);
+                $idFromResponse = $jsonObject['data']['id'];
+
+                $json = json_encode($jsonObject['data']);
+                // check if JSON contains desired parameters
+                // Ex.: expect($json)->contains("name");
+
+                expect($id)->equals($idFromResponse);
+            });
+        });
+    }
+
+    public function testList{{model.fullNameWithoutRoot}}Paginated()
+    {
+        $this->describe("List {{model.fullNameWithoutRoot}} resources paginated", function() {
+
+            $this->it("returns HTTP sucess status", function () {
+                $response = $this->getResponse("GET", ['query' => ['page' => 1, 'size' => 10]]);
+                expect($response->getStatusCode())->equals(self::SUCCESS);
+            });
+
+            $this->it("returns same page if same GET parameters are used", function () {
+                $firstResponse = $this->getJsonArray(1, 10);
+                $secondResponse = $this->getJsonArray(1, 10);
+                expect(json_encode($firstResponse))->equals(json_encode($secondResponse));
+            });
+
+            $this->it("returns the exact amount of objects requested, if available", function () {
+                $size = 10;
+                $response = $this->getJsonArray(1, $size);
+                expect(count($response))->equals($size);
+            });
+        });
+    }
+
+    // write additional tests below here
+}
