@@ -94,6 +94,7 @@ abstract class ApiController extends BaseController
         $relations = $this->getEagerLoad();
         $page = (int) $this->request->input('page');
         $size = (int) $this->request->input('size');
+        $filters = (array) $this->request->input('filter');
 
         if (empty($volatileFields)) {
             $strVolatile = (String) $this->request->input('volatileFields');
@@ -102,7 +103,7 @@ abstract class ApiController extends BaseController
             }
         }
 
-        $resource = $this->repository->list($page, $size, $relations, $volatileFields);
+        $resource = $this->repository->list($page, $size, $relations, $volatileFields, $filters);
 
         $resource = $this->addMetaIncludes($resource, $metaInfo);
 

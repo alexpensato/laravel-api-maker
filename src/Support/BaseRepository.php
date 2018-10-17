@@ -120,7 +120,9 @@ abstract class BaseRepository implements RepositoryInterface
     {
         $query = $this->model->with($relations);
 
-        foreach ($filters as $field => $value) {
+        $mappedFilters = $this->transformer->mapper($filters, $this->model);
+
+        foreach ($mappedFilters as $field => $value) {
             $query = $this->applyFilter($query, $field, $value);
         }
 
