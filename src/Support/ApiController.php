@@ -86,10 +86,11 @@ abstract class ApiController extends BaseController
      *
      * @param array $metaInfo
      * @param array $volatileFields
+     * @param bool $trashed
      *
      * @return Response
      */
-    public function indexWithMetaResponse($metaInfo, $volatileFields = [])
+    public function indexWithMetaResponse($metaInfo, $volatileFields = [], $trashed = false)
     {
         $relations = $this->getEagerLoad();
         $page = (int) $this->request->input('page');
@@ -103,7 +104,7 @@ abstract class ApiController extends BaseController
             }
         }
 
-        $resource = $this->repository->list($page, $size, $relations, $volatileFields, $filters);
+        $resource = $this->repository->list($page, $size, $relations, $volatileFields, $filters, $trashed);
 
         $resource = $this->addMetaIncludes($resource, $metaInfo);
 

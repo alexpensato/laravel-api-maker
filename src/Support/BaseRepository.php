@@ -58,6 +58,13 @@ abstract class BaseRepository implements RepositoryInterface
     protected $allowFullScan = false;
 
     /**
+     * Whether a query should use soft delete clause
+     *
+     * @var boolean
+     */
+    protected $useSoftDeletes = false;
+
+    /**
      * Resource key for an item.
      *
      * @var string
@@ -81,6 +88,8 @@ abstract class BaseRepository implements RepositoryInterface
     public function __construct(Model $model, $transformer)
     {
         $this->model = $model;
+
+        $this->useSoftDeletes = in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($model));
 
         $this->transformer = $transformer;
     }
@@ -113,10 +122,11 @@ abstract class BaseRepository implements RepositoryInterface
      * @param array $relations
      * @param array $volatileFields
      * @param array $filters
+     * @param bool $trashed
      *
      * @return ResourceAbstract
      */
-    public function list(int $page, int $size, array $relations = [], array $volatileFields = [], array $filters = [])
+    public function list(int $page, int $size, array $relations = [], array $volatileFields = [], array $filters = [], bool $trashed = false)
     {
         $query = $this->model->with($relations);
 
@@ -124,6 +134,14 @@ abstract class BaseRepository implements RepositoryInterface
 
         foreach ($mappedFilters as $field => $value) {
             $query = $this->applyFilter($query, $field, $value);
+        }
+
+        if ($this->useSoftDeletes && !$trashed) {
+            $query->whereNull('deleted_at');
+        }
+
+        if ($trashed) {
+            $query->withTrashed();
         }
 
         $count = $query->count();
