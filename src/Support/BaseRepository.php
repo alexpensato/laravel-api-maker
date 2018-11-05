@@ -216,7 +216,7 @@ abstract class BaseRepository implements RepositoryInterface
      *
      * @param array $data
      *
-     * @return ResourceAbstract
+     * @return ResourceAbstract|null
      */
     public function create(array $data)
     {
@@ -226,7 +226,14 @@ abstract class BaseRepository implements RepositoryInterface
 
         $record = $this->model->create($newData);
 
-        return $this->loadResourceWithItem($record);
+        $idField = $record->getKeyName();
+        if(is_numeric($record->$idField) && $record->$idField > 0) {
+            $record = $this->findModel($record->$idField);
+            return $this->loadResourceWithItem($record);
+
+        } else {
+            return null;
+        }
     }
 
     /**
