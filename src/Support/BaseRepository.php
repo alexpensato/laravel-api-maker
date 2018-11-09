@@ -122,11 +122,12 @@ abstract class BaseRepository implements RepositoryInterface
      * @param array $relations
      * @param array $volatileFields
      * @param array $filters
+     * @param string $orderBy
      * @param bool $trashed
      *
      * @return ResourceAbstract
      */
-    public function list(int $page, int $size, array $relations = [], array $volatileFields = [], array $filters = [], bool $trashed = false)
+    public function list(int $page, int $size, array $relations = [], array $volatileFields = [], array $filters = [], string $orderBy = '', bool $trashed = false)
     {
         $query = $this->model->with($relations);
 
@@ -160,7 +161,11 @@ abstract class BaseRepository implements RepositoryInterface
             $query = $query->limit($this->defaultSize);
         }
 
-        $list = $query->orderBy($this->defaultOrderBy)->get();
+        if ($orderBy.isEmpty()) {
+            $list = $query->orderBy($this->defaultOrderBy)->get();
+        } else {
+            $list = $query->orderBy($orderBy)->get();
+        }
 
         return $this->loadResourceWithCollection($list, $page, $count, $volatileFields);
     }
