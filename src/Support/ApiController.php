@@ -96,7 +96,7 @@ abstract class ApiController extends BaseController
         $page = (int) $this->request->input('page');
         $size = (int) $this->request->input('size');
         $filters = (array) $this->request->input('filter');
-        $orderBy = (string) $this->request->input('order_by');
+        $orderBy = (array) $this->request->input('order_by');
 
         if (empty($volatileFields)) {
             $strVolatile = (String) $this->request->input('volatileFields');

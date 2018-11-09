@@ -122,12 +122,12 @@ abstract class BaseRepository implements RepositoryInterface
      * @param array $relations
      * @param array $volatileFields
      * @param array $filters
-     * @param string $orderBy
+     * @param array $orderBy
      * @param bool $trashed
      *
      * @return ResourceAbstract
      */
-    public function list(int $page, int $size, array $relations = [], array $volatileFields = [], array $filters = [], string $orderBy = '', bool $trashed = false)
+    public function list(int $page, int $size, array $relations = [], array $volatileFields = [], array $filters = [], array $orderBy = [], bool $trashed = false)
     {
         $query = $this->model->with($relations);
 
@@ -161,11 +161,23 @@ abstract class BaseRepository implements RepositoryInterface
             $query = $query->limit($this->defaultSize);
         }
 
-        if ($orderBy.isEmpty()) {
-            $list = $query->orderBy($this->defaultOrderBy)->get();
+        if (empty($orderBy)) {
+            $query = $query->orderBy($this->defaultOrderBy);
+
         } else {
-            $list = $query->orderByRaw($orderBy)->get();
+            foreach ($orderBy as $fieldValue) {
+                $fieldValueArray = explode('.', $fieldValue);
+                $direction = 'asc';
+                if (count($fieldValueArray)==2) {
+                    $direction = $fieldValueArray[1];
+                }
+                // TODO:
+                $mappedFilters = $this->transformer->mapper($filters, $this->model);
+                $query = $query->orderBy($fieldValueArray[0], $direction);
+            }
         }
+
+        $list = $query->get();
 
         return $this->loadResourceWithCollection($list, $page, $count, $volatileFields);
     }
