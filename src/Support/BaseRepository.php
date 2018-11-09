@@ -164,7 +164,7 @@ abstract class BaseRepository implements RepositoryInterface
         if ($orderBy.isEmpty()) {
             $list = $query->orderBy($this->defaultOrderBy)->get();
         } else {
-            $list = $query->orderBy($orderBy)->get();
+            $list = $query->orderByRaw($orderBy)->get();
         }
 
         return $this->loadResourceWithCollection($list, $page, $count, $volatileFields);
