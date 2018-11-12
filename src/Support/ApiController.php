@@ -283,7 +283,7 @@ abstract class ApiController extends BaseController
      */
     protected function associateHasMany($str)
     {
-        $objectName = str_replace('-', '', ucwords($str, '-'));
+        $objectName = str_replace('_', '', ucwords($str, '_'));
         $repositoryFullName = get_class($this->repository);
         $exploded = explode('\\',$repositoryFullName);
         $repositoryName = end($exploded);
@@ -325,12 +325,12 @@ abstract class ApiController extends BaseController
      */
     protected function attachManyToMany($str, $type = 'attach')
     {
-        $relation = str_replace('-', '', $str);
+        $relation = str_replace('_', '', ucwords($str, '_'));
 
         $uri = $this->request->path();
         $exploded = explode('/', $uri);
         $routeName = end($exploded);
-        $objectName = str_replace('-', '', $routeName);
+        $objectName = str_replace('_', '', ucwords($routeName, '_'));
 
         $objectArray = $this->request->json()->get($objectName);
         if (!$objectArray) {
