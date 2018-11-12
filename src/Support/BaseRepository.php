@@ -165,15 +165,19 @@ abstract class BaseRepository implements RepositoryInterface
             $query = $query->orderBy($this->defaultOrderBy);
 
         } else {
+            $fields = [];
             foreach ($orderBy as $fieldValue) {
-                $fieldValueArray = explode('.', $fieldValue);
+                $fieldValue = explode('.', $fieldValue);
                 $direction = 'asc';
-                if (count($fieldValueArray)==2) {
-                    $direction = $fieldValueArray[1];
+                if (count($fieldValue)==2) {
+                    $direction = $fieldValue[1];
                 }
-                // TODO:
-                $mappedFilters = $this->transformer->mapper($filters, $this->model);
-                $query = $query->orderBy($fieldValueArray[0], $direction);
+                $fields[$fieldValue[0]] = $direction;
+            }
+
+            $mappedFields = $this->transformer->mapper($fields, $this->model);
+            foreach ($mappedFields as $key => $value) {
+                $query = $query->orderBy($key, $value);
             }
         }
 
