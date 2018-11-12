@@ -323,10 +323,8 @@ abstract class ApiController extends BaseController
      *
      * @return Response
      */
-    protected function attachManyToMany($str, $type = 'attach')
+    protected function attachManyToMany($strRelation, $type = 'attach')
     {
-        $relation = str_replace('_', '', ucwords($str, '_'));
-
         $uri = $this->request->path();
         $exploded = explode('/', $uri);
         $routeName = end($exploded);
@@ -341,19 +339,20 @@ abstract class ApiController extends BaseController
             if (!$objectData['id']) {
                 return $this->errorWrongArgs("Parameter 'id' not found in the request body.");
             }
-            if (!$objectData[$relation]) {
-                return $this->errorWrongArgs("Parameter '" . $relation . "' not found in the request body.");
+            if (!$objectData[$strRelation]) {
+                return $this->errorWrongArgs("Parameter '" . $strRelation . "' not found in the request body.");
             }
         }
 
+        $relation = str_replace('_', '', ucwords($strRelation, '_'));
+
         $commited = array();
         $errors = array();
-        $response = false;
         foreach ($objectArray as $objectData) {
             if($type == 'detach') {
-                $response = $this->repository->detach($relation, $objectData['id'], $objectData[$relation]);
+                $response = $this->repository->detach($relation, $objectData['id'], $objectData[$strRelation]);
             } else {
-                $response = $this->repository->attach($relation, $objectData['id'], $objectData[$relation]);
+                $response = $this->repository->attach($relation, $objectData['id'], $objectData[$strRelation]);
             }
 
             if($response) {
