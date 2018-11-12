@@ -51,6 +51,13 @@ abstract class BaseRepository implements RepositoryInterface
     protected $defaultOrderBy = 'id';
 
     /**
+     * Default separator for order by query string fields
+     *
+     * @var string
+     */
+    protected $orderBySeparator = '.';
+
+    /**
      * Whether a request should be allowed to perform a full scan on a repository
      *
      * @var boolean
@@ -167,7 +174,7 @@ abstract class BaseRepository implements RepositoryInterface
         } else {
             $fields = [];
             foreach ($orderBy as $fieldValue) {
-                $fieldValue = explode('.', $fieldValue);
+                $fieldValue = explode($this->orderBySeparator, $fieldValue);
                 $direction = 'asc';
                 if (count($fieldValue)==2) {
                     $direction = $fieldValue[1];
