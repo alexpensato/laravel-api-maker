@@ -1,14 +1,16 @@
 <?php
 
+namespace Pensato\Api\Support;
+
 class BaseEnum {
 
 	static function init() {
 		$className = get_called_class();
 		try {
-            $class = new ReflectionClass($className);
+            $class = new \ReflectionClass($className);
             $properties = $class->getStaticProperties();
 
-        } catch (ReflectionException $e) {
+        } catch (\ReflectionException $e) {
             return;
         }
 
@@ -23,10 +25,10 @@ class BaseEnum {
 	static function fromInt(int $value) {
         $className = get_called_class();
         try {
-            $class = new ReflectionClass($className);
+            $class = new \ReflectionClass($className);
             $properties = $class->getStaticProperties();
 
-        } catch (ReflectionException $e) {
+        } catch (\ReflectionException $e) {
             return null;
         }
 

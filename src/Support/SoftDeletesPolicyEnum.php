@@ -2,7 +2,7 @@
 
 namespace Pensato\Api\Support;
 
-class SoftDeletesPolicyEnum extends \BaseEnum
+class SoftDeletesPolicyEnum extends BaseEnum
 {
     static $NONE_TRASHED, $ONLY_TRASHED, $WITH_TRASHED;
 }
