@@ -1,10 +1,17 @@
 <?php
 
 class BaseEnum {
+
 	static function init() {
 		$className = get_called_class();
-		$class = new ReflectionClass($className);
-		$properties = $class->getStaticProperties();
+		try {
+            $class = new ReflectionClass($className);
+            $properties = $class->getStaticProperties();
+
+        } catch (ReflectionException $e) {
+            return;
+        }
+
 		$counter = 0;
 
 		foreach ($properties as $name => $value) {
@@ -14,12 +21,17 @@ class BaseEnum {
 	}
 
 	static function fromInt(int $value) {
-		$className = get_called_class();
-		$class = new ReflectionClass($className);
-		$properties = $class->getStaticProperties();
+        $className = get_called_class();
+        try {
+            $class = new ReflectionClass($className);
+            $properties = $class->getStaticProperties();
+
+        } catch (ReflectionException $e) {
+            return null;
+        }
 
 		if ($value < 0 || $value >= count($properties)) {
-			throw new Exception("Invalid enum value");
+			return null;
 		}
 		
 		$property = array_keys($properties)[$value];

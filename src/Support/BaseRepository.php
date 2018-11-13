@@ -130,11 +130,11 @@ abstract class BaseRepository implements RepositoryInterface
      * @param array $volatileFields
      * @param array $filters
      * @param array $orderBy
-     * @param bool $trashed
+     * @param SoftDeletesPolicyEnum $softDeletesPolicy
      *
      * @return ResourceAbstract
      */
-    public function list(int $page, int $size, array $relations = [], array $volatileFields = [], array $filters = [], array $orderBy = [], bool $trashed = false)
+    public function list(int $page, int $size, array $relations = [], array $volatileFields = [], array $filters = [], array $orderBy = [], SoftDeletesPolicyEnum $softDeletesPolicy = null)
     {
         $query = $this->model->with($relations);
 
@@ -144,12 +144,18 @@ abstract class BaseRepository implements RepositoryInterface
             $query = $this->applyFilter($query, $field, $value);
         }
 
-        if ($this->useSoftDeletes && !$trashed) {
-            $query->whereNull('deleted_at');
-        }
-
-        if ($trashed) {
-            $query->withTrashed();
+        if ($this->useSoftDeletes) {
+            switch($softDeletesPolicy) {
+                case SoftDeletesPolicyEnum::$NONE_TRASHED:
+                    $query->whereNull('deleted_at');
+                    break;
+                case SoftDeletesPolicyEnum::$ONLY_TRASHED:
+                    $query->onlyTrashed();
+                    break;
+                case SoftDeletesPolicyEnum::$WITH_TRASHED:
+                    $query->withTrashed();
+                    break;
+            }
         }
 
         $count = $query->count();

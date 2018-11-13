@@ -86,11 +86,11 @@ abstract class ApiController extends BaseController
      *
      * @param array $metaInfo
      * @param array $volatileFields
-     * @param bool $trashed
+     * @param SoftDeletesPolicyEnum $softDeletesPolicy
      *
      * @return Response
      */
-    public function indexWithMetaResponse($metaInfo, $volatileFields = [], $trashed = false)
+    public function indexWithMetaResponse($metaInfo, $volatileFields = [], SoftDeletesPolicyEnum $softDeletesPolicy = null)
     {
         $relations = $this->getEagerLoad();
         $page = (int) $this->request->input('page');
@@ -105,7 +105,7 @@ abstract class ApiController extends BaseController
             }
         }
 
-        $resource = $this->repository->list($page, $size, $relations, $volatileFields, $filters, $orderBy, $trashed);
+        $resource = $this->repository->list($page, $size, $relations, $volatileFields, $filters, $orderBy, $softDeletesPolicy);
 
         $resource = $this->addMetaIncludes($resource, $metaInfo);
 

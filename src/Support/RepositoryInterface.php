@@ -6,7 +6,7 @@ interface RepositoryInterface
 {
     public function all();
 
-    public function list(int $page, int $size, array $relations = [], array $volatileFields = [], array $filters = [], array $orderBy = [], bool $trashed = false);
+    public function list(int $page, int $size, array $relations = [], array $volatileFields = [], array $filters = [], array $orderBy = [], SoftDeletesPolicyEnum $softDeletesPolicy = null);
 
     public function count();
 
