@@ -3,6 +3,7 @@
 namespace Pensato\Api\Support;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use League\Fractal\Pagination\Cursor;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
@@ -158,7 +159,9 @@ abstract class BaseRepository implements RepositoryInterface
             }
         }
 
-        $count = $query->count();
+        $countQuery = "select count(*) as aggregate from ({$query->toSql()}) c";
+
+        $count = collect(DB::select($countQuery, $query->getBindings()))->pluck('aggregate')->first();
 
         if ($page > 0) {
             if ($size <= 0) {
