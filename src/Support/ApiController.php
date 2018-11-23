@@ -283,6 +283,8 @@ abstract class ApiController extends BaseController
      */
     protected function associateHasMany($str)
     {
+        $field = $this->request->query('field');
+
         $objectName = str_replace('_', '', ucwords($str, '_'));
         $repositoryFullName = get_class($this->repository);
         $exploded = explode('\\',$repositoryFullName);
@@ -305,7 +307,7 @@ abstract class ApiController extends BaseController
             return $this->errorWrongArgs("Parameter '" . $routeName . "' not found in the request body.");
         }
 
-        $response = $this->repository->associate($repositoryName, $objectData['id'], $objectData[$routeName]);
+        $response = $this->repository->associate($repositoryName, $objectData['id'], $objectData[$routeName], $field);
 
         if (is_string($response)) {
             return $this->errorWrongArgs($response);

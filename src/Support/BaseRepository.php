@@ -335,10 +335,11 @@ abstract class BaseRepository implements RepositoryInterface
      * @param string $class
      * @param int $id
      * @param array $ids
+     * @param string $fieldName
      *
      * @return int|string
      */
-    public function associate($class, $id, $ids)
+    public function associate($class, $id, $ids, $fieldName)
     {
         /** @var BaseRepository $repo */
         $repo = new $class;
@@ -348,10 +349,17 @@ abstract class BaseRepository implements RepositoryInterface
             return "Object to be associated with not found! ID: " . $id;
         }
 
+        $field = $this->transformer->mapper([$fieldName => $id], $this->model);
+
+        if(empty($field)) {
+            return "Unmapped field name: " . $fieldName;
+        }
+
         $models = $this->findModel($ids);
         $result = "Invalid association list. Please check the request body.";
+
         if (!empty($models)) {
-            $result = $this->model->whereIn($this->model->getKeyName(), $ids)->update([$object->getKeyName() => $id]);
+            $result = $this->model->whereIn($this->model->getKeyName(), $ids)->update($field);
         }
 
         return $result;

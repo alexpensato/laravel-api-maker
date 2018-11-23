@@ -20,7 +20,7 @@ interface RepositoryInterface
 
     public function show($id);
 
-    public function associate($class, $id, $ids);
+    public function associate($class, $id, $ids, $fieldName);
 
     public function attach($relation, $id, $ids);
 
