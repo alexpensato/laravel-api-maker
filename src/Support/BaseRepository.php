@@ -47,9 +47,9 @@ abstract class BaseRepository implements RepositoryInterface
     /**
      * Default order by for queries
      *
-     * @var array
+     * @var array|string
      */
-    protected $defaultOrderBy = ['id.asc'];
+    protected $defaultOrderBy = ['id' => 'asc'];
 
     /**
      * Default separator for order by query string fields
@@ -177,12 +177,11 @@ abstract class BaseRepository implements RepositoryInterface
             $query = $query->limit($this->defaultSize);
         }
 
-        $fields = [];
         if (empty($orderBy)) {
             if (is_array($this->defaultOrderBy)) {
-                $fields = $this->getFieldsArray($this->defaultOrderBy);
+                $fields = $this->defaultOrderBy;
             } else {
-                $fields = $this->getFieldsArray(array($this->defaultOrderBy));
+                $fields = array($this->defaultOrderBy => 'asc');
             }
         } else {
             $fields = $this->getFieldsArray($orderBy);
