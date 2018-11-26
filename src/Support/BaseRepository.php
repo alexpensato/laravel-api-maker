@@ -47,9 +47,9 @@ abstract class BaseRepository implements RepositoryInterface
     /**
      * Default order by for queries
      *
-     * @var string
+     * @var array
      */
-    protected $defaultOrderBy = 'id';
+    protected $defaultOrderBy = ['id.asc'];
 
     /**
      * Default separator for order by query string fields
@@ -178,24 +178,28 @@ abstract class BaseRepository implements RepositoryInterface
         }
 
         if (empty($orderBy)) {
-            $query = $query->orderBy($this->defaultOrderBy);
-
-        } else {
-            $fields = [];
-            foreach ($orderBy as $fieldValue) {
-                $fieldValue = explode($this->orderBySeparator, $fieldValue);
-                $direction = 'asc';
-                if (count($fieldValue)==2) {
-                    $direction = $fieldValue[1];
-                }
-                $fields[$fieldValue[0]] = $direction;
-            }
-
-            $mappedFields = $this->transformer->mapper($fields, $this->model);
-            foreach ($mappedFields as $key => $value) {
-                $query = $query->orderBy($key, $value);
+            if (is_array($this->defaultOrderBy)) {
+                $orderBy = $this->defaultOrderBy;
+            } else {
+                $orderBy = array($this->defaultOrderBy);
             }
         }
+
+        $fields = [];
+        foreach ($orderBy as $fieldValue) {
+            $fieldValue = explode($this->orderBySeparator, $fieldValue);
+            $direction = 'asc';
+            if (count($fieldValue)==2) {
+                $direction = $fieldValue[1];
+            }
+            $fields[$fieldValue[0]] = $direction;
+        }
+
+        $mappedFields = $this->transformer->mapper($fields, $this->model);
+        foreach ($mappedFields as $key => $value) {
+            $query = $query->orderBy($key, $value);
+        }
+
 
         $list = $query->get();
 
@@ -378,6 +382,7 @@ abstract class BaseRepository implements RepositoryInterface
     public function attach($relation, $id, $ids)
     {
         try {
+            $this->findModel($id, [$relation])->$relation()->detach($ids);
             $this->findModel($id, [$relation])->$relation()->attach($ids);
             
             return true;
