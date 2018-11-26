@@ -275,39 +275,50 @@ abstract class ApiController extends BaseController
 
     /**
      * Associate using OneToMany relation
-     * Query string: ?belongs_to={model_name}
+     * Query string: ?belongs_to={main_model_name}&model={relation_model_name}&field={field_name}
      *
-     * @param string $str
+     * @param string $strParam
      *
      * @return Response
      */
-    protected function associateHasMany($str)
+    protected function associateHasMany($strParam)
     {
-        $field = $this->request->query('field');
-
-        $objectName = str_replace('_', '', ucwords($str, '_'));
+        // Build repository name
+        $objectName = str_replace('_', '', ucwords($strParam, '_'));
         $repositoryFullName = get_class($this->repository);
         $exploded = explode('\\',$repositoryFullName);
         $repositoryName = end($exploded);
         $repositoryName = str_replace($repositoryName,$objectName . 'Repository', $repositoryFullName);
 
+        // Get json object data
         $objectName = lcfirst($objectName);
         $objectData = $this->request->json()->get($objectName);
         if (!$objectData) {
             return $this->errorWrongArgs("Parameter '" . $objectName . "' not found in the request body.");
         }
-        if (!$objectData['id']) {
+        if (!isset($objectData['id'])) {
             return $this->errorWrongArgs("Parameter 'id' not found in the request body.");
         }
 
-        $uri = $this->request->path();
-        $exploded = explode('/',$uri);
-        $routeName = end($exploded);
-        if (!$objectData[$routeName]) {
-            return $this->errorWrongArgs("Parameter '" . $routeName . "' not found in the request body.");
+        // Get field to be mapped to relation foreign key
+        $fieldName = $this->request->query('field');
+        if (empty($fieldName)) {
+            $fieldName = $objectName . "_id";
         }
 
-        $response = $this->repository->associate($repositoryName, $objectData['id'], $objectData[$routeName], $field);
+        // Get
+        $modelName = $this->request->query('model');
+        if (empty($modelName) || !isset($objectData[$modelName])) {
+            $uri = $this->request->path();
+            $exploded = explode('/', $uri);
+            $routeName = end($exploded);
+            if (!isset($objectData[$routeName])) {
+                return $this->errorWrongArgs("Query string parameter 'model' is invalid or '" . $routeName . "' not found in the request body.");
+            }
+            $modelName = $routeName;
+        }
+
+        $response = $this->repository->associate($repositoryName, $objectData['id'], $objectData[$modelName], $fieldName);
 
         if (is_string($response)) {
             return $this->errorWrongArgs($response);
@@ -332,6 +343,7 @@ abstract class ApiController extends BaseController
         $routeName = end($exploded);
         $objectName = str_replace('_', '', ucwords($routeName, '_'));
 
+        $objectName = lcfirst($objectName);
         $objectArray = $this->request->json()->get($objectName);
         if (!$objectArray) {
             return $this->errorWrongArgs("Array parameter '" . $objectName . "' not found in the request body.");
