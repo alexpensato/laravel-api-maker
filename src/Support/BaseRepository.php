@@ -177,14 +177,34 @@ abstract class BaseRepository implements RepositoryInterface
             $query = $query->limit($this->defaultSize);
         }
 
+        $fields = [];
         if (empty($orderBy)) {
             if (is_array($this->defaultOrderBy)) {
-                $orderBy = $this->defaultOrderBy;
+                $fields = $this->getFieldsArray($this->defaultOrderBy);
             } else {
-                $orderBy = array($this->defaultOrderBy);
+                $fields = $this->getFieldsArray(array($this->defaultOrderBy));
             }
+        } else {
+            $fields = $this->getFieldsArray($orderBy);
+            $fields = $this->transformer->mapper($fields, $this->model);
         }
 
+        foreach ($fields as $key => $value) {
+            $query = $query->orderBy($key, $value);
+        }
+
+        $list = $query->get();
+
+        return $this->loadResourceWithCollection($list, $page, $count, $volatileFields);
+    }
+
+    /**
+     * @param array $orderBy
+     *
+     * @return array
+     */
+    protected function getFieldsArray($orderBy)
+    {
         $fields = [];
         foreach ($orderBy as $fieldValue) {
             $fieldValue = explode($this->orderBySeparator, $fieldValue);
@@ -194,16 +214,7 @@ abstract class BaseRepository implements RepositoryInterface
             }
             $fields[$fieldValue[0]] = $direction;
         }
-
-        $mappedFields = $this->transformer->mapper($fields, $this->model);
-        foreach ($mappedFields as $key => $value) {
-            $query = $query->orderBy($key, $value);
-        }
-
-
-        $list = $query->get();
-
-        return $this->loadResourceWithCollection($list, $page, $count, $volatileFields);
+        return $fields;
     }
 
     /**
