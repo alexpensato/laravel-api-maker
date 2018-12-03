@@ -4,7 +4,6 @@ namespace Tests;
 
 use Exception;
 use Codeception\Specify;
-use Faker\Factory as Faker;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -67,6 +66,45 @@ abstract class GuzzleTestCase extends BaseTestCase
 
         } catch (Exception $e) {
             $this->assertEquals("ERROR", "TestCase::getJsonArray Exception: " . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Get JSON Array from paginated GET request using Filters array
+     *
+     * @param int $page
+     * @param int $size
+     * @param array $filters
+     * @param string $uriSuffix
+     * @param string $jsonParam
+     *
+     * @throws
+     *
+     * @return array|mixed
+     */
+    protected function getFilteredJsonArray($page, $size, $filters, $uriSuffix = "", $jsonParam = "data")
+    {
+        try {
+            $data = array();
+            $data['page']  = $page ;
+            $data['size']  = $size ;
+            foreach ($filters as $name => $value) {
+                $data['filter[' . $name . ']']  = $value ;
+            }
+            $responseInterface = $this->client->request('GET', $this->uri . $uriSuffix, ['query' => $data]);
+            $content = $responseInterface->getBody()->getContents();
+
+            if(!empty($jsonParam)) {
+                return json_decode($content)->$jsonParam;
+            } else {
+                return json_decode($content, true);
+            }
+
+
+        } catch (Exception $e) {
+            $this->assertEquals("ERROR", "TestCase::getFilteredJsonArray Exception: " . $e->getMessage());
         }
 
         return null;
