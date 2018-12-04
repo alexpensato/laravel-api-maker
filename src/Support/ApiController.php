@@ -306,19 +306,19 @@ abstract class ApiController extends BaseController
             $fieldName = $objectName . "_id";
         }
 
-        // Get
-        $modelName = $this->request->query('model');
-        if (empty($modelName) || !isset($objectData[$modelName])) {
+        // Get json name parameter
+        $jsonParam = $this->request->query('model');
+        if (empty($jsonParam) || !isset($objectData[$jsonParam])) {
             $uri = $this->request->path();
             $exploded = explode('/', $uri);
             $routeName = end($exploded);
             if (!isset($objectData[$routeName])) {
                 return $this->errorWrongArgs("Query string parameter 'model' is invalid or '" . $routeName . "' not found in the request body.");
             }
-            $modelName = $routeName;
+            $jsonParam = $routeName;
         }
 
-        $response = $this->repository->associate($repositoryName, $objectData['id'], $objectData[$modelName], $fieldName);
+        $response = $this->repository->associate($repositoryName, $objectData['id'], $objectData[$jsonParam], $fieldName);
 
         if (is_string($response)) {
             return $this->errorWrongArgs($response);
