@@ -373,11 +373,12 @@ abstract class BaseRepository implements RepositoryInterface
         }
 
         $models = $this->findModel($ids);
-        $result = "Invalid association list. Please check the request body.";
 
-        if (!empty($models)) {
-            $result = $this->model->whereIn($this->model->getKeyName(), $ids)->update($field);
+        if (empty($models) || empty($models[0])) {
+            return "Invalid association list. Please check the request body.";
         }
+
+        $result = $this->model->whereIn($this->model->getKeyName(), $ids)->update($field);
 
         return $result;
     }
