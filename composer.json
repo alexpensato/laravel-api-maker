@@ -28,5 +28,13 @@
         "psr-4": {
             "Pensato\\Api\\": "src/"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Pensato//Api//ServiceProvider",
+                "App//Providers//ApiServiceProvider"
+            ]
+        }
     }
 }
