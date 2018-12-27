@@ -32,8 +32,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Pensato\\Api\\ServiceProvider",
-                "App\\Providers\\ApiServiceProvider"
+                "Pensato/Api/ServiceProvider"
             ]
         }
     }
